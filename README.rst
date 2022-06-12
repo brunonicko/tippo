@@ -29,7 +29,7 @@ on python 3.7+.
 Example
 -------
 
-Instead of using a try block for forward compatibility:
+Instead of using an ugly try block for forwards compatibility...
 
 .. code:: python
 
@@ -44,7 +44,7 @@ Instead of using a try block for forward compatibility:
     ...     from typing_extensions import final
     ...
 
-Just import from `tippo` instead:
+...just import directly from `tippo`!
 
 .. code:: python
 
