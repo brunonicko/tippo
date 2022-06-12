@@ -18,9 +18,9 @@ def test_generic_aliases():
         for name in info.names:
             generic = getattr(tippo, name)
             if original_base is not generic:
+                assert not tippo.is_generic(original_base)
+                assert tippo.is_generic(generic)
                 assert hasattr(generic, "__class_getitem__")
-                assert hasattr(generic, "__parameters__")
-                assert generic.__parameters__ == info.vars
 
 
 if __name__ == "__main__":
