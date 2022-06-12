@@ -9,7 +9,7 @@ setuptools.setup(
     version="0.1.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
-    description="Cleaner and forward compatible way to use typing features",
+    description="Cleaner and forwards compatible way to use typing features",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/brunonicko/tippo",

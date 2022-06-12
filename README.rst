@@ -23,7 +23,7 @@ Tippo
 
 Overview
 --------
-`Tippo` provides a cleaner and forward compatible way to use features from the `typing` and `typing_extension` modules
+`Tippo` provides a cleaner and forwards compatible way to use features from the `typing` and `typing_extension` modules
 on python 3.7+.
 
 Example
