@@ -53,7 +53,8 @@ Just import from `tippo` instead:
 Generic Weak Structures
 -----------------------
 
-`Tippo` also implements generic versions of weak data structures that work with older python versions' type annotations:
+`Tippo` also implements generic versions of weak data structures that work with older python versions' type annotations
+(3.7) without the need to defer their evaluation:
 
 .. code:: python
 
@@ -63,4 +64,4 @@ Generic Weak Structures
     >>> weak_ref: ReferenceType[X]
     >>> weak_set: WeakSet[X]
     >>> weak_key_dict: WeakKeyDictionary[X, Any]
-    >>> weak_value_dict: WeakKeyDictionary[Any, X]
+    >>> weak_value_dict: WeakValueDictionary[Any, X]
