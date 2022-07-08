@@ -23,8 +23,8 @@ Tippo
 
 Overview
 --------
-`Tippo` provides a cleaner and forwards compatible way to use features from the `typing` and `typing_extension` modules
-on python 3.7+.
+`Tippo` provides a cleaner and compatible way to use features from both `typing` and `typing_extension` with a wide
+range of python versions.
 
 Example
 -------
@@ -34,9 +34,9 @@ Instead of using an ugly try block for forwards compatibility...
 .. code:: python
 
     >>> try:
-    ...     from typing import Annotated
+    ...     from typing import Generic
     ... except ImportError:
-    ...     from typing_extensions import Annotated
+    ...     from typing_extensions import Generic
     ...
     >>> try:
     ...     from typing import final
@@ -48,20 +48,20 @@ Instead of using an ugly try block for forwards compatibility...
 
 .. code:: python
 
-    >>> from tippo import Annotated, final
+    >>> from tippo import Generic, final
 
 Generic Weak Structures
 -----------------------
 
 `Tippo` also implements generic versions of weak data structures that work with older python versions' type annotations
-(3.7) without the need to defer their evaluation:
+without the need to defer their evaluation:
 
 .. code:: python
 
     >>> from tippo import Any, ReferenceType, WeakSet, WeakKeyDictionary, WeakValueDictionary
-    >>> class X:
+    >>> class Foo(object):
     ...     pass
-    >>> weak_ref: ReferenceType[X]
-    >>> weak_set: WeakSet[X]
-    >>> weak_key_dict: WeakKeyDictionary[X, Any]
-    >>> weak_value_dict: WeakValueDictionary[Any, X]
+    >>> weak_ref = ReferenceType(Foo())  # type: ReferenceType[Foo]
+    >>> weak_set = WeakSet({Foo()})  # type: WeakSet[Foo]
+    >>> weak_key_dict = WeakKeyDictionary({Foo(): "foo"})  # type: WeakKeyDictionary[Foo, Any]
+    >>> weak_value_dict = WeakValueDictionary({"foo": Foo()})  # type: WeakValueDictionary[Any, Foo]
