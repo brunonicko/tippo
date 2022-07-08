@@ -39,23 +39,6 @@ else:
     type.__setattr__(_GenericMeta, "__ne__", __ne__)
 
 
-def is_generic(typ):
-    # type: (_typing.Type) -> bool
-    """
-    Tell whether a class is generic or not.
-
-    :param typ: Class.
-    :return: True if generic.
-    """
-    return (
-        isinstance(typ, type)
-        and issubclass(typ, getattr(_typing, "Generic"))
-        or isinstance(typ, getattr(_typing, "_GenericAlias"))
-        and getattr(typ, "__origin__")
-        not in (_typing.Union, tuple, _typing.ClassVar, _typing.Callable, _collections_abc.Callable)
-    )
-
-
 # Build missing generic types.
 _GenericInfo = _typing.NamedTuple(
     "_GenericInfo",
@@ -90,10 +73,15 @@ _GENERIC_TYPES = {
 }
 
 for _base, (_names, _vars) in _GENERIC_TYPES.items():
-    if is_generic(_base):
+    if hasattr(_base, "__args__") and hasattr(_base, "__origin__"):
         continue
 
-    _generic = _types.new_class(_base.__name__, (_base, _typing.Generic[_vars]))  # type: ignore
+    if hasattr(_types, "new_class"):
+        _generic = _types.new_class(_base.__name__, (_base, _typing.Generic[_vars]))  # type: ignore
+    elif hasattr(_typing, "GenericMeta"):
+        _generic = _typing.GenericMeta(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
+    else:
+        _generic = type(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
 
     for _name in _names:
         globals()[_name] = _generic

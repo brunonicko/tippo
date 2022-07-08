@@ -22,9 +22,7 @@ def test_generic_aliases():
         for name in info.names:
             generic = getattr(tippo, name)
             if original_base is not generic:
-                assert not tippo.is_generic(original_base)
-                assert tippo.is_generic(generic)
-                assert hasattr(generic, "__class_getitem__")
+                assert hasattr(generic, "__class_getitem__") or hasattr(type(generic), "__getitem__")
 
 
 def test_generic_meta():
@@ -38,18 +36,6 @@ def test_generic_meta():
 
     assert isinstance(_Class[int](), _Class)
     assert isinstance(_Class[(int,)](), _Class)
-
-
-def test_is_generic():
-    class _GenericClass(typing.Generic[T]):
-        pass
-
-    class _Class(object):
-        pass
-
-    assert tippo.is_generic(_GenericClass) is True
-    assert tippo.is_generic(_GenericClass[int]) is True
-    assert tippo.is_generic(_Class) is False
 
 
 if __name__ == "__main__":
