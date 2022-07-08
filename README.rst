@@ -34,9 +34,9 @@ Instead of using an ugly try block for forwards compatibility...
 .. code:: python
 
     >>> try:
-    ...     from typing import Annotated
+    ...     from typing import Generic
     ... except ImportError:
-    ...     from typing_extensions import Annotated
+    ...     from typing_extensions import Generic
     ...
     >>> try:
     ...     from typing import final
@@ -48,7 +48,7 @@ Instead of using an ugly try block for forwards compatibility...
 
 .. code:: python
 
-    >>> from tippo import Annotated, final
+    >>> from tippo import Generic, final
 
 Generic Weak Structures
 -----------------------
