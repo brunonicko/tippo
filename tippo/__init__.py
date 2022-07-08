@@ -60,8 +60,8 @@ def is_generic(typ):
 _GenericInfo = _typing.NamedTuple(
     "_GenericInfo",
     (
-        ("names", _typing.Tuple[str, ...]),
-        ("vars", _typing.Tuple[_typing.TypeVar, ...]),
+        ("names", "_typing.Tuple[str, ...]"),
+        ("vars", "_typing.Tuple[_typing.TypeVar, ...]"),
     ),
 )
 
