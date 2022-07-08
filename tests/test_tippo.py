@@ -22,6 +22,8 @@ def test_generic_aliases():
         for name in info.names:
             generic = getattr(tippo, name)
             if original_base is not generic:
+                assert not hasattr(original_base, "__class_getitem__")
+                assert not hasattr(type(original_base), "__getitem__")
                 assert hasattr(generic, "__class_getitem__") or hasattr(type(generic), "__getitem__")
 
 

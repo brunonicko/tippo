@@ -73,7 +73,7 @@ _GENERIC_TYPES = {
 }
 
 for _base, (_names, _vars) in _GENERIC_TYPES.items():
-    if hasattr(_base, "__args__") and hasattr(_base, "__origin__"):
+    if hasattr(_base, "__class_getitem__") or hasattr(type(_base), "__getitem__"):
         continue
 
     if hasattr(_types, "new_class"):
