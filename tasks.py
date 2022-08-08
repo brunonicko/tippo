@@ -23,11 +23,11 @@ def lint(c):
     c.run("flake8 tippo --count --select=E9,F63,F7,F82 --show-source --statistics")
     c.run("flake8 tests --count --select=E9,F63,F7,F82 --show-source --statistics")
     c.run(
-        "flake8 tippo --count --ignore=F403,F401,E203,E731,C901,W503 "
+        "flake8 tippo --count --ignore=F405,F403,F401,E203,E731,C901,W503 "
         "--max-line-length=120 --statistics"
     )
     c.run(
-        "flake8 tests --count --ignore=F403,F401,E203,E731,C901,W503 "
+        "flake8 tests --count --ignore=F405,F403,F401,E203,E731,C901,W503 "
         "--max-line-length=120 --statistics"
     )
 
