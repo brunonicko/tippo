@@ -11,7 +11,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="tippo",
-    version="1.0.1",
+    version="1.1.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
     description="Cleaner and forwards compatible way to use typing features.",
@@ -32,6 +32,6 @@ setuptools.setup(
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
-    python_requires=(">= 2.7, " "!= 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*, != 3.5.*, != 3.6.*"),
+    python_requires=">= 2.7, " "!= 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*, != 3.5.*, != 3.6.*",
     tests_require=["pytest"],
 )
