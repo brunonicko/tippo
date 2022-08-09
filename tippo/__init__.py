@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import sys
 import inspect as _inspect
 import types as _types
 from weakref import (
@@ -202,6 +203,10 @@ def get_name(typ, force_typing_name=False, name_getter=None):
     if name_getter is not None:
         name = name_getter(typ)
 
+    # Forward references.
+    if hasattr(typ, "__forward_arg__"):
+        name = typ.__forward_arg__
+
     # Special name.
     if name is None:
         try:
@@ -211,7 +216,7 @@ def get_name(typ, force_typing_name=False, name_getter=None):
             pass
 
     # Python 2.7.
-    if type(typ).__module__ == "typing":
+    if not hasattr(typ, "__forward_arg__") and type(typ).__module__ == "typing":
         if type(typ).__name__.strip("_") == "Literal":
             return "Literal"
         if type(typ).__name__.strip("_") == "Final":
@@ -258,11 +263,12 @@ def get_name(typ, force_typing_name=False, name_getter=None):
         return None
 
     # Force typing name if possible.
-    module = getattr(typ, "__module__", None)
-    if force_typing_name and module == _moves.builtins.__name__:
-        typing_name = name.strip("_").capitalize()
-        if hasattr(_typing, typing_name) or hasattr(_typing_extensions, typing_name):
-            name = typing_name
+    if not hasattr(typ, "__forward_arg__"):
+        module = getattr(typ, "__module__", None)
+        if force_typing_name and module == _moves.builtins.__name__:
+            typing_name = name.strip("_").capitalize()
+            if hasattr(_typing, typing_name) or hasattr(_typing_extensions, typing_name):
+                name = typing_name
 
     return name
 
@@ -360,14 +366,15 @@ def get_path(typ, include_args=True, include_module=True, force_typing_name=Fals
             name = "{}[{}]".format(name, formatted_args)
 
     # Include module.
-    module = getattr(typ, "__module__", None)
-    if module is not None:
-        if (include_module is True and module != _moves.builtins.__name__) or (
-            include_module == "auto"
-            and module not in (None, "typing", "typing_extensions", __name__, _moves.builtins.__name__)
-        ):
-            if module in ("typing", "typing_extensions") and name_without_args in globals():
-                module = __name__
-            name = "{}.{}".format(module, name)
+    if not hasattr(typ, "__forward_arg__"):
+        module = getattr(typ, "__module__", None)
+        if module is not None:
+            if (include_module is True and module != _moves.builtins.__name__) or (
+                include_module == "auto"
+                and module not in (None, "typing", "typing_extensions", __name__, _moves.builtins.__name__)
+            ):
+                if module in ("typing", "typing_extensions") and name_without_args in globals():
+                    module = __name__
+                name = "{}.{}".format(module, name)
 
     return name
