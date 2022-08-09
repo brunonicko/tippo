@@ -76,6 +76,8 @@ def test_get_path():
     assert tippo.get_path(tippo.List[str]) == "tippo.List[str]"
     assert tippo.get_path(tippo.Dict[str, int]) == "tippo.Dict[str, int]"
     assert tippo.get_path(tippo.Set[str]) == "tippo.Set[str]"
+    assert tippo.get_path(tippo.Set["Foo"]) == "tippo.Set[Foo]"
+    assert tippo.get_path(tippo.List["Tuple[Foo, ...]"]) == "tippo.List[Tuple[Foo, ...]]"
 
 
 if __name__ == "__main__":
