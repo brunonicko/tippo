@@ -7,4 +7,3 @@ mypy
 pytest
 sphinx
 sphinx_rtd_theme
-types-six
