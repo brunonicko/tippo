@@ -1,5 +1,6 @@
 from __future__ import absolute_import, division, print_function
 
+import functools as _functools
 import types as _types
 from weakref import (
     ref,  # noqa
@@ -152,3 +153,131 @@ if "final" not in globals():
         return f
 
     _update_all("final")
+
+
+# Add missing inspection functions for older Python versions.
+if "get_origin" not in globals():
+    from typing_inspect import get_origin as _get_origin  # type: ignore
+
+    @_functools.wraps(_get_origin)
+    def get_origin(typ):
+        if typ is Generic:
+            return Generic
+
+        if typ in (Union, Literal, Final, ClassVar):
+            return None
+
+        for name, origin in {"_Literal": Literal, "_ClassVar": ClassVar, "_Final": Final}.items():
+            if type(typ) is getattr(_typing, name, None):
+                return origin
+
+        return _get_origin(typ)
+
+    _update_all("get_origin")
+
+
+if "get_args" not in globals():
+    from typing_inspect import get_args as _get_args  # type: ignore
+
+    @_functools.wraps(_get_args)
+    def get_args(typ):
+        return _get_args(typ, True)
+
+    _update_all("get_args")
+
+
+_SPECIAL_NAMES = {
+    Ellipsis: "...",
+    None: "None",
+    type(None): "NoneType",
+    True: "True",
+    False: "False",
+    NotImplemented: "NotImplemented",
+    type(NotImplemented): "NotImplementedType",
+}
+
+
+def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
+    # type: (Any, Callable[[Any], Optional[str]]) -> Optional[str]
+    """
+    Get name.
+
+    :param typ: Type/typing form.
+    :param qualname_getter: Qualified name getter function override.
+    :return: Name or None.
+    :raises TypeError: Could not get name for typing argument.
+    """
+    name = None
+
+    # Forward references.
+    if hasattr(typ, "__forward_arg__"):
+        name = typ.__forward_arg__
+
+    # Special name.
+    if name is None:
+        try:
+            if typ in _SPECIAL_NAMES:
+                name = _SPECIAL_NAMES[typ]
+        except TypeError:  # ignore non-hashable
+            pass
+
+    # Python 2.7.
+    if not hasattr(typ, "__forward_arg__") and type(typ).__module__ in ("typing", "typing_extensions", "tippo"):
+        if type(typ).__name__.strip("_") == "Literal":
+            return "Literal"
+        if type(typ).__name__.strip("_") == "Final":
+            return "Final"
+        if type(typ).__name__.strip("_") == "ClassVar":
+            return "ClassVar"
+
+    # Try a couple of ways to get the name.
+    if name is None:
+
+        # Get origin name.
+        origin = get_origin(typ)
+        if origin is not None:
+            origin_name = (
+                qualname_getter(origin)
+                or getattr(origin, "__name__", None)
+                or getattr(origin, "_name", None)
+                or getattr(origin, "__forward_arg__", None)
+            )
+        else:
+            origin_name = None
+
+        # Get the name.
+        name = (
+            qualname_getter(typ)
+            or getattr(typ, "__name__", None)
+            or getattr(typ, "_name", None)
+            or getattr(typ, "__forward_arg__", None)
+        )
+
+        # We have an origin name.
+        if origin_name:
+
+            # But we don't have a name. Use the origin name instead.
+            if not name:
+                name = origin_name
+
+            # Prefer the origin name if longer and (for qualified generic names).
+            elif name and origin_name.endswith(name) and len(origin_name) > len(name):
+                name = origin_name
+
+        # Special cases.
+        elif not name:
+            for cls_name, special_name in {
+                "_Literal": "Literal",
+                "_ClassVar": "ClassVar",
+                "_Final": "Final",
+                "_Union": "Union",
+            }.items():
+                cls = getattr(_typing, cls_name, None)
+                if type(typ) is cls or origin is not None and type(origin) is cls:
+                    name = special_name
+                    break
+
+    return name or None
+
+
+_update_all("get_name")
