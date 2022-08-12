@@ -39,6 +39,7 @@ _BUILTINS_MAPPING = {
     Set: set,
     Dict: dict,
     Tuple: tuple,
+    Type: type,
 }
 _BUILTINS_MAPPING.update(
     dict(
@@ -205,7 +206,6 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
     :param typ: Type/typing form.
     :param qualname_getter: Qualified name getter function override.
     :return: Name or None.
-    :raises TypeError: Could not get name for typing argument.
     """
     name = None
 
