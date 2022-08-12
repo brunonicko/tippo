@@ -106,7 +106,8 @@ def test_get_args():
     assert tippo.get_args(tippo.Callable[Ellipsis, T][int]) == (Ellipsis, int)
 
     assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, tippo.Dict[str, bool]]][bool]) == (
-        int, tippo.Tuple[bool, tippo.Dict[str, bool]]
+        int,
+        tippo.Tuple[bool, tippo.Dict[str, bool]],
     )
     assert tippo.get_args(tippo.Dict[str, T][bool]) == (str, bool)
     assert tippo.get_args(tippo.List[T][bool]) == (bool,)
