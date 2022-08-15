@@ -33,6 +33,14 @@ def _update_all(*_members):
     _all_.extend(set(_members).difference(_all_))
 
 
+# Forward reference type.
+try:
+    from typing import ForwardRef
+except ImportError:
+    from typing import _ForwardRef as ForwardRef  # type: ignore  # noqa
+    _update_all("ForwardRef")
+
+
 # Mappings.
 _BUILTINS_MAPPING = {
     List: list,
@@ -194,6 +202,7 @@ _SPECIAL_NAMES = {
     Literal: "Literal",
     Final: "Final",
     Union: "Union",
+    ForwardRef: "ForwardRef",
     Ellipsis: "...",
     None: "None",
     type(None): "NoneType",
@@ -215,28 +224,24 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
     """
     name = None
 
-    # Forward references.
-    if hasattr(typ, "__forward_arg__"):
-        name = typ.__forward_arg__
-
     # Special name.
-    if name is None:
-        try:
-            if typ in _SPECIAL_NAMES:
-                name = _SPECIAL_NAMES[typ]
-        except TypeError:  # ignore non-hashable
-            pass
+    try:
+        if typ in _SPECIAL_NAMES:
+            name = _SPECIAL_NAMES[typ]
+    except TypeError:  # ignore non-hashable
+        pass
 
     # Python 2.7.
-    if not hasattr(typ, "__forward_arg__") and type(typ).__module__ in ("typing", "typing_extensions", "tippo"):
-        if type(typ).__name__.strip("_") == "Literal":
-            return "Literal"
-        if type(typ).__name__.strip("_") == "Final":
-            return "Final"
-        if type(typ).__name__.strip("_") == "ClassVar":
-            return "ClassVar"
+    if name is None:
+        if not hasattr(typ, "__forward_arg__") and type(typ).__module__ in ("typing", "typing_extensions", "tippo"):
+            if type(typ).__name__.lstrip("_") == "Literal":
+                return "Literal"
+            if type(typ).__name__.lstrip("_") == "Final":
+                return "Final"
+            if type(typ).__name__.lstrip("_") == "ClassVar":
+                return "ClassVar"
 
-    # Try a couple of ways to get the name.
+    # Try a couple of other ways to get the name.
     if name is None:
 
         # Get origin name.
