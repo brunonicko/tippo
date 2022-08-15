@@ -85,7 +85,7 @@ except ImportError:
 else:
 
     def __ne__(cls, other):
-        is_equal = cls.__eq__(other)
+        is_equal = cls == other
         if is_equal is NotImplemented:
             return NotImplemented
         else:
