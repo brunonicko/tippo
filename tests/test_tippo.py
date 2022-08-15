@@ -138,6 +138,7 @@ def test_get_name():
     assert tippo.get_name(tippo.Generic) == "Generic"
     assert tippo.get_name(tippo.Literal) == "Literal"
     assert tippo.get_name(tippo.Final) == "Final"
+    assert tippo.get_name(tippo.ForwardRef) == "ForwardRef"
     assert tippo.get_name(tippo.ClassVar) == "ClassVar"
     assert tippo.get_name(tippo.Callable) == "Callable"
     assert tippo.get_name(tippo.Tuple) == "Tuple"
@@ -148,6 +149,7 @@ def test_get_name():
     assert tippo.get_name(tippo.Dict) == "Dict"
     assert tippo.get_name(tippo.Set) == "Set"
 
+    assert tippo.get_name(tippo.ForwardRef("Foo")) == "Foo"
     assert tippo.get_name(tippo.Generic[T]) == "Generic"
     assert tippo.get_name(tippo.Literal[True, False, "abc"]) == "Literal"
     assert tippo.get_name(tippo.Final[int]) == "Final"
