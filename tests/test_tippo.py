@@ -130,6 +130,8 @@ def test_get_name():
     assert tippo.get_name(False) == "False"
     assert tippo.get_name(NotImplemented) == "NotImplemented"
     assert tippo.get_name(type(NotImplemented)) == "NotImplementedType"
+    assert tippo.get_name(tippo.Any) == "Any"
+    assert tippo.get_name(tippo.Optional) == "Optional"
     assert tippo.get_name(tippo.Generic) == "Generic"
     assert tippo.get_name(tippo.Literal) == "Literal"
     assert tippo.get_name(tippo.Final) == "Final"

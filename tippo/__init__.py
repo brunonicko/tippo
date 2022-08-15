@@ -188,6 +188,12 @@ if "get_args" not in globals():
 
 
 _SPECIAL_NAMES = {
+    Any: "Any",
+    ClassVar: "ClassVar",
+    Optional: "Optional",
+    Literal: "Literal",
+    Final: "Final",
+    Union: "Union",
     Ellipsis: "...",
     None: "None",
     type(None): "NoneType",
