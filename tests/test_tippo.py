@@ -50,6 +50,9 @@ def test_generic_meta():
     assert isinstance(_Class[int](), _Class)
     assert isinstance(_Class[(int,)](), _Class)
 
+    assert tippo.Mapping[str, int] == tippo.Mapping[str, int]
+    assert not (tippo.Mapping[str, int] != tippo.Mapping[str, int])
+
 
 def test_generic_aliases():
     for original_base, info in tippo._GENERIC_TYPES.items():
