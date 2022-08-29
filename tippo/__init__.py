@@ -164,13 +164,14 @@ def make_generic(cls, args=()):
     pass
 
 
-def make_generic(cls=None, args=()):
+def make_generic(cls=None, args=(), generic_meta=None):
     """
     Make a generic class. Can be used as a class decorator.
     If the provided class is already generic, itself will be returned.
 
     :param cls: Non-generic class.
     :param args: Type variables.
+    :param generic_meta: Custom GenericMeta metaclass.
     :return: Generic class.
     """
 
@@ -189,15 +190,15 @@ def make_generic(cls=None, args=()):
             return _types.new_class(base.__name__, (base, _typing.Generic[args]))  # type: ignore
 
         # Using generic metaclass.
-        if hasattr(_typing, "GenericMeta"):
+        if generic_meta is not None or hasattr(_typing, "GenericMeta"):
             base_meta = type(base)
-            generic_meta = getattr(_typing, "GenericMeta")
+            generic_meta_ = getattr(_typing, "GenericMeta") if generic_meta is None else generic_meta
             classobj = type(_weakref.WeakKeyDictionary)
-            if base_meta not in (type, classobj) and not isinstance(base_meta, generic_meta):
+            if base_meta not in (type, classobj) and not isinstance(base_meta, generic_meta_):
                 dct = {"__module__": base_meta.__module__}
                 if "__qualname__" in base_meta.__dict__:
                     dct.update({"__module__": base_meta.__qualname__})
-                derived_base_meta = type(base_meta.__name__, (base_meta, generic_meta), dct)
+                derived_base_meta = type(base_meta.__name__, (base_meta, generic_meta_), dct)
 
                 bases = tuple(b for b in base.__bases__ if b is not object) + (_typing.Generic[args],)  # type: ignore
                 return type(
