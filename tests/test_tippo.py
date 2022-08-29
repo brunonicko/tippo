@@ -54,6 +54,16 @@ def test_generic_meta():
     assert not (tippo.Mapping[str, int] != tippo.Mapping[str, int])
 
 
+def test_make_generic():
+    class Foo(object):
+        pass
+
+    GenericFoo = tippo.make_generic(Foo, (T,))  # noqa
+    assert issubclass(GenericFoo, Foo)
+    assert tippo.get_origin(GenericFoo[int]) is GenericFoo  # type: ignore
+    assert tippo.get_args(GenericFoo[int]) == (int,)  # type: ignore
+
+
 def test_generic_aliases():
     for original_base, info in tippo._GENERIC_TYPES.items():
         for name in info.names:
