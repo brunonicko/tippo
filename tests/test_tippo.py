@@ -1,10 +1,13 @@
 from __future__ import absolute_import, division, print_function
 
+import abc
+
 try:
     import collections.abc as collections_abc
 except ImportError:
     import collections as collections_abc  # type: ignore
 
+import six
 import typing
 import typing_extensions
 import pytest
@@ -60,8 +63,23 @@ def test_make_generic():
 
     GenericFoo = tippo.make_generic(Foo, (T,))  # noqa
     assert issubclass(GenericFoo, Foo)
+    assert GenericFoo is not Foo
     assert tippo.get_origin(GenericFoo[int]) is GenericFoo  # type: ignore
     assert tippo.get_args(GenericFoo[int]) == (int,)  # type: ignore
+
+
+def test_make_generic_with_metaclass():
+    class FooMetaBase(type):
+        pass
+
+    class FooMeta(abc.ABCMeta, FooMetaBase):
+        pass
+
+    @tippo.make_generic(args=(T,))
+    class Foo(six.with_metaclass(FooMeta, object)):
+        pass
+
+    assert Foo[int]
 
 
 def test_generic_aliases():
