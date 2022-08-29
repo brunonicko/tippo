@@ -38,6 +38,7 @@ try:
     from typing import ForwardRef
 except ImportError:
     from typing import _ForwardRef as ForwardRef  # type: ignore  # noqa
+
     _update_all("ForwardRef")
 
 
@@ -104,56 +105,6 @@ else:
     _update_all("GenericMeta")
 
 
-# Build missing generic types.
-_GenericInfo = _typing.NamedTuple(
-    "_GenericInfo",
-    (
-        ("names", "_typing.Tuple[str, ...]"),
-        ("vars", "_typing.Tuple[_typing.TypeVar, ...]"),
-    ),
-)
-
-_T = _typing.TypeVar("_T")
-_KT = _typing.TypeVar("_KT")
-_VT_co = _typing.TypeVar("_VT_co", covariant=True)
-_T_co = _typing.TypeVar("_T_co", covariant=True)
-
-_GENERIC_TYPES = {
-    ReferenceType: _GenericInfo(
-        names=("ReferenceType", "ref"),
-        vars=(_typing.cast(_typing.TypeVar, _T),),
-    ),
-    WeakSet: _GenericInfo(
-        names=("WeakSet",),
-        vars=(_typing.cast(_typing.TypeVar, _T_co),),
-    ),
-    WeakKeyDictionary: _GenericInfo(
-        names=("WeakKeyDictionary",),
-        vars=(_typing.cast(_typing.TypeVar, _KT), _typing.cast(_typing.TypeVar, _VT_co)),
-    ),
-    WeakValueDictionary: _GenericInfo(
-        names=("WeakValueDictionary",),
-        vars=(_typing.cast(_typing.TypeVar, _KT), _typing.cast(_typing.TypeVar, _VT_co)),
-    ),
-}
-
-for _base, (_names, _vars) in _GENERIC_TYPES.items():
-    _update_all(*_names)
-
-    if hasattr(_base, "__class_getitem__") or hasattr(type(_base), "__getitem__"):
-        continue
-
-    if hasattr(_types, "new_class"):
-        _generic = _types.new_class(_base.__name__, (_base, _typing.Generic[_vars]))  # type: ignore
-    elif hasattr(_typing, "GenericMeta"):
-        _generic = _typing.GenericMeta(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
-    else:
-        _generic = type(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
-
-    for _name in _names:
-        globals()[_name] = _generic
-
-
 # Add missing final decorator for older Python versions.
 if "final" not in globals():
 
@@ -195,6 +146,75 @@ if "get_args" not in globals():
     _update_all("get_args")
 
 
+# Function to make generic base.
+def make_generic(base, args):
+    # type: (Type, Tuple[_typing.TypeVar, ...]) -> Type
+    """
+    Make a generic base.
+    If the provided base is already generic, itself will be returned.
+
+    :param base: Non-generic base.
+    :param args: Type variables.
+    :return: Generic base.
+    """
+
+    # Already generic.
+    if hasattr(base, "__class_getitem__") or hasattr(type(base), "__getitem__"):
+        return base
+
+    # Make generic.
+    if hasattr(_types, "new_class"):
+        return _types.new_class(base.__name__, (base, _typing.Generic[args]))  # type: ignore
+    elif hasattr(_typing, "GenericMeta"):
+        return _typing.GenericMeta(base.__name__, (base, _typing.Generic[args]), {})  # type: ignore
+    else:
+        return type(base.__name__, (base, _typing.Generic[args]), {})  # type: ignore
+
+
+_update_all("make_generic")
+
+
+# Build missing generic types.
+_GenericInfo = _typing.NamedTuple(
+    "_GenericInfo",
+    (
+        ("names", "_typing.Tuple[str, ...]"),
+        ("args", "_typing.Tuple[_typing.TypeVar, ...]"),
+    ),
+)
+
+_T = _typing.TypeVar("_T")
+_KT = _typing.TypeVar("_KT")
+_VT_co = _typing.TypeVar("_VT_co", covariant=True)
+_T_co = _typing.TypeVar("_T_co", covariant=True)
+
+_GENERIC_TYPES = {
+    ReferenceType: _GenericInfo(
+        names=("ReferenceType", "ref"),
+        args=(_typing.cast(_typing.TypeVar, _T),),
+    ),
+    WeakSet: _GenericInfo(
+        names=("WeakSet",),
+        args=(_typing.cast(_typing.TypeVar, _T_co),),
+    ),
+    WeakKeyDictionary: _GenericInfo(
+        names=("WeakKeyDictionary",),
+        args=(_typing.cast(_typing.TypeVar, _KT), _typing.cast(_typing.TypeVar, _VT_co)),
+    ),
+    WeakValueDictionary: _GenericInfo(
+        names=("WeakValueDictionary",),
+        args=(_typing.cast(_typing.TypeVar, _KT), _typing.cast(_typing.TypeVar, _VT_co)),
+    ),
+}
+
+for _base, (_names, _args) in _GENERIC_TYPES.items():
+    _update_all(*_names)
+    _generic = make_generic(_base, _args)  # type: Type
+    for _name in _names:
+        globals()[_name] = _generic
+
+
+# Function to get type name that supports generics.
 _SPECIAL_NAMES = {
     Any: "Any",
     ClassVar: "ClassVar",
