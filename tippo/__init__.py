@@ -2,7 +2,6 @@ from __future__ import absolute_import, division, print_function
 
 import functools as _functools
 import types as _types
-import weakref as _weakref
 from weakref import (
     ref,  # noqa
     ReferenceType,
@@ -10,8 +9,6 @@ from weakref import (
     WeakValueDictionary,
     WeakSet,
 )
-
-import six
 
 try:
     import collections.abc as _collections_abc
@@ -149,76 +146,6 @@ if "get_args" not in globals():
     _update_all("get_args")
 
 
-# Function/decorator to make generic base.
-
-
-@overload
-def make_generic(cls=None, args=()):
-    # type: (Literal[None], Tuple[_typing.TypeVar, ...]) -> Callable[[Type[_T]], Type[_T]]
-    pass
-
-
-@overload
-def make_generic(cls, args=()):
-    # type: (Type[_T], Tuple[_typing.TypeVar, ...]) -> Type[_T]
-    pass
-
-
-def make_generic(cls=None, args=(), generic_meta=None):
-    """
-    Make a generic class. Can be used as a class decorator.
-    If the provided class is already generic, itself will be returned.
-
-    :param cls: Non-generic class.
-    :param args: Type variables.
-    :param generic_meta: Custom GenericMeta metaclass.
-    :return: Generic class.
-    """
-
-    def decorator(base):
-        # Already generic.
-        if (
-            hasattr(_typing, "GenericMeta")
-            and isinstance(base, getattr(_typing, "GenericMeta"))
-            or hasattr(base, "__class_getitem__")
-            or hasattr(type(base), "__getitem__")
-        ):
-            return base
-
-        # Make generic.
-        if hasattr(_types, "new_class"):
-            return _types.new_class(base.__name__, (base, _typing.Generic[args]))  # type: ignore
-
-        # Using generic metaclass.
-        if generic_meta is not None or hasattr(_typing, "GenericMeta"):
-            base_meta = type(base)
-            generic_meta_ = getattr(_typing, "GenericMeta") if generic_meta is None else generic_meta
-            classobj = type(_weakref.WeakKeyDictionary)
-            if base_meta not in (type, classobj) and not isinstance(base_meta, generic_meta_):
-                dct = {"__module__": base_meta.__module__}
-                if "__qualname__" in base_meta.__dict__:
-                    dct.update({"__module__": base_meta.__qualname__})
-                derived_base_meta = type(base_meta.__name__, (base_meta, generic_meta_), dct)
-
-                bases = tuple(b for b in base.__bases__ if b is not object) + (_typing.Generic[args],)  # type: ignore
-                return type(
-                    base.__name__,
-                    (six.with_metaclass(derived_base_meta, *bases),),  # type: ignore
-                    dict(base.__dict__),
-                )
-
-        # Just subclass.
-        return type(base.__name__, (base, _typing.Generic[args]), {})  # type: ignore
-
-    if cls is None:
-        return decorator
-    else:
-        return decorator(cls)
-
-
-_update_all("make_generic")
-
-
 # Build missing generic types.
 _GenericInfo = _typing.NamedTuple(
     "_GenericInfo",
@@ -252,9 +179,19 @@ _GENERIC_TYPES = {
     ),
 }
 
-for _base, (_names, _args) in _GENERIC_TYPES.items():
+for _base, (_names, _vars) in _GENERIC_TYPES.items():
     _update_all(*_names)
-    _generic = make_generic(_base, _args)  # type: Type
+
+    if hasattr(_base, "__class_getitem__") or hasattr(type(_base), "__getitem__"):
+        continue
+
+    if hasattr(_types, "new_class"):
+        _generic = _types.new_class(_base.__name__, (_base, _typing.Generic[_vars]))  # type: ignore
+    elif hasattr(_typing, "GenericMeta"):
+        _generic = _typing.GenericMeta(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
+    else:
+        _generic = type(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
+
     for _name in _names:
         globals()[_name] = _generic
 
