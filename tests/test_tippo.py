@@ -7,6 +7,8 @@ except ImportError:
 
 import typing
 import typing_extensions
+
+import six
 import pytest
 
 import tippo
@@ -39,7 +41,39 @@ def test_all():
 
 
 def test_generic_meta():
-    class _Class(typing.Generic[T]):
+
+    # Metaclass uniformity.
+    assert isinstance(tippo.Generic, tippo.GenericMeta)
+
+    # Comparisons.
+    assert tippo.Mapping[str, int] == tippo.Mapping[str, int]
+    assert not (tippo.Mapping[str, int] != tippo.Mapping[str, int])
+
+    # Bracket syntax should not work if class doesn't inherit from Generic.
+    class Class(six.with_metaclass(tippo.GenericMeta, object)):
+        pass
+
+    with pytest.raises(TypeError):
+        _BadClass = Class[None]  # type: ignore
+        assert not _BadClass
+
+    # Should error if didn't specify type variables to Generic.
+    with pytest.raises(TypeError):
+
+        class _BadClass(Class, tippo.Generic[3]):  # type: ignore
+            pass
+
+        assert not _BadClass
+
+    with pytest.raises(TypeError):
+
+        class _BadClass(Class, tippo.Generic[int]):  # type: ignore
+            pass
+
+        assert not _BadClass
+
+    # Declare a proper Generic class and check inheritance, equality, and instantiation.
+    class _Class(Class, tippo.Generic[T]):
         pass
 
     assert _Class[int]
@@ -50,8 +84,26 @@ def test_generic_meta():
     assert isinstance(_Class[int](), _Class)
     assert isinstance(_Class[(int,)](), _Class)
 
-    assert tippo.Mapping[str, int] == tippo.Mapping[str, int]
-    assert not (tippo.Mapping[str, int] != tippo.Mapping[str, int])
+    assert issubclass(_Class, Class)
+    assert _Class[int]
+    assert (_Class[int] == _Class[int]) is True
+    assert (_Class[int] == _Class[(int,)]) is True
+    assert (_Class[int] != _Class[(int,)]) is False
+
+    assert isinstance(_Class[int](), _Class)
+    assert isinstance(
+        _Class[(int,)](),
+        _Class,
+    )
+
+    # Test weakref slot with generic.
+    class Class(tippo.Generic[T]):
+        __slots__ = ("__weakref__",)
+
+    class SubClass(Class[T]):
+        __slots__ = ()
+
+    assert SubClass
 
 
 def test_generic_aliases():
