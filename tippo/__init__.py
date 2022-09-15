@@ -86,13 +86,14 @@ def get_typing(typ):
 _update_all("get_builtin", "get_typing")
 
 
-# Fix GenericMeta not equals comparison for Python 2.7.
+# Patch GenericMeta for Python 2.7 with some fixes.
 try:
     from typing import GenericMeta as _GenericMeta  # type: ignore
 except ImportError:
-    pass
+    GenericMeta = type
 else:
 
+    # Fix not equal operator logic in python 2.
     def __ne__(cls, other):
         is_equal = cls == other
         if is_equal is NotImplemented:
@@ -102,7 +103,25 @@ else:
 
     __ne__.__module__ = _GenericMeta.__module__
     type.__setattr__(_GenericMeta, "__ne__", __ne__)
-    _update_all("GenericMeta")
+
+    # Fix subclassing slotted generic class with __weakref__.
+    _original_getitem = getattr(_GenericMeta, "__getitem__")
+
+    @_functools.wraps(_original_getitem)
+    def __getitem__(cls, params):
+        slots = getattr(cls, "__slots__", None)
+        if slots is not None and "__weakref__" in slots:
+            type.__setattr__(cls, "__slots__", tuple(s for s in slots if s != "__weakref__"))
+            try:
+                return _original_getitem(cls, params)  # type: ignore
+            finally:
+                type.__setattr__(cls, "__slots__", slots)
+        else:
+            return _original_getitem(cls, params)  # type: ignore
+
+    type.__setattr__(_GenericMeta, "__getitem__", __getitem__)
+
+_update_all("GenericMeta")
 
 
 # Add missing final decorator for older Python versions.
