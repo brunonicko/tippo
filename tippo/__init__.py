@@ -137,7 +137,6 @@ if "final" not in globals():
 
 
 class _MissingMeta(type):
-
     def __getitem__(cls, _):
         return cls
 
