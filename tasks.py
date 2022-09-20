@@ -1,4 +1,4 @@
-from invoke import task  # type: ignore
+from invoke import task  # type: ignore  # noqa
 
 
 @task

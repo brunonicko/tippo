@@ -10,6 +10,8 @@ from weakref import (
     WeakSet,
 )
 
+import six
+
 try:
     import collections.abc as _collections_abc
 except ImportError:
@@ -132,6 +134,30 @@ if "final" not in globals():
         return f
 
     _update_all("final")
+
+
+class _MissingMeta(type):
+
+    def __getitem__(cls, _):
+        return cls
+
+
+# Add missing TypeAlias for older Python versions.
+if "TypeAlias" not in globals():
+
+    class TypeAlias(six.with_metaclass(_MissingMeta, object)):  # type: ignore
+        pass
+
+    _update_all("TypeAlias")
+
+
+# Add missing ClassVar for older Python versions.
+if "ClassVar" not in globals():
+
+    class ClassVar(six.with_metaclass(_MissingMeta, object)):  # type: ignore
+        pass
+
+    _update_all("ClassVar")
 
 
 # Add missing inspection functions for older Python versions.
