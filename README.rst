@@ -23,8 +23,8 @@ Tippo
 
 Overview
 --------
-`Tippo` provides a cleaner and compatible way to use features from both `typing` and `typing_extension` with a wide
-range of python versions.
+`Tippo` provides a cleaner and compatible way to use features from both `typing` and `typing_extension` across a wide
+range of Python versions, including Python 2.7.
 
 Example
 -------
@@ -50,10 +50,54 @@ Instead of using an ugly try block for forwards compatibility...
 
     >>> from tippo import Generic, final
 
+Generic Fixes
+-------------
+`Tippo` patches `GenericMeta` to fix known bugs for the Python 2.7 version of `typing` that were not addressed since
+it's not officially supported anymore.
+
+Generic class comparison:
+
+.. code:: python
+
+    >>> from tippo import Mapping
+    >>> assert Mapping[str, int] == Mapping[str, int]  # passes
+    >>> assert not (Mapping[str, int] != Mapping[str, int])  # passes
+
+Subclassing a generic class with a `__weakref__` slot:
+
+.. code:: python
+
+    >>> from weakref import ref
+    >>> from tippo import Generic, TypeVar
+    >>> T = TypeVar("T")
+    >>> class MyGeneric(Generic[T]):
+    ...     __slots__ = ("__weakref__",)
+    ...
+    >>> class SubClass(MyGeneric[T]):  # does not error out
+    ...     __slots__ = ()
+    ...
+    >>> instance = SubClass()
+    >>> instance_ref = ref(instance)
+
+Also, in order to maintain the same interface, `GenericMeta` points to `type` when imported from `tippo` in newer
+versions of Python.
+
+Missing Features
+----------------
+`Tippo` back-ports some features from future versions of Python to older ones, such as `TypeAlias`, `ClassVar`,
+`NewType`, `get_origin`, and `get_args`.
+
+.. code:: python
+
+    >>> from tippo import Mapping, get_args, get_name
+    >>> mapping_type = Mapping[str, int]
+    >>> [get_name(a) for a in get_args(mapping_type)]
+    ['str', 'int']
+
 Generic Weak Structures
 -----------------------
 
-`Tippo` also implements generic versions of weak data structures that work with older python versions' type annotations
+`Tippo` also implements generic versions of weak data structures that work with older Python versions' type annotations
 without the need to defer their evaluation:
 
 .. code:: python
@@ -61,7 +105,7 @@ without the need to defer their evaluation:
     >>> from tippo import Any, ReferenceType, WeakSet, WeakKeyDictionary, WeakValueDictionary
     >>> class Foo(object):
     ...     pass
-    >>> weak_ref = ReferenceType(Foo())  # type: ReferenceType[Foo]
-    >>> weak_set = WeakSet({Foo()})  # type: WeakSet[Foo]
-    >>> weak_key_dict = WeakKeyDictionary({Foo(): "foo"})  # type: WeakKeyDictionary[Foo, Any]
-    >>> weak_value_dict = WeakValueDictionary({"foo": Foo()})  # type: WeakValueDictionary[Any, Foo]
+    >>> weak_ref = ReferenceType[Foo](Foo())
+    >>> weak_set = WeakSet[Foo]({Foo()})
+    >>> weak_key_dict = WeakKeyDictionary[Foo, Any]({Foo(): "foo"})
+    >>> weak_value_dict = WeakValueDictionary[Any, Foo]({"foo": Foo()})

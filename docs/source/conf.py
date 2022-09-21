@@ -7,7 +7,7 @@ sys.path.insert(0, root_path)
 
 # Project information.
 project = "Tippo"
-copyright = "2022, Bruno Nicko"
+copyright = "2022, Bruno Nicko"  # noqa
 author = "Bruno Nicko"
 
 # Sphinx extensions.
@@ -24,12 +24,12 @@ language = "en"
 
 # List of patterns to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []
+exclude_patterns = []  # type: list[str]
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "monokai"
 
 # HTML options.
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {}
+html_theme_options = {}  # type: dict
 html_static_path = ["_static"]

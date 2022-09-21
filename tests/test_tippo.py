@@ -49,6 +49,12 @@ def test_missing():
             assert getattr(tippo, missing)[obj] is obj
 
 
+def test_new_type():
+    if not hasattr(typing, "NewType") and not hasattr(typing_extensions, "NewType"):
+        obj = object()
+        assert getattr(tippo, "NewType")("obj", obj) is obj
+
+
 def test_generic_meta():
 
     # Metaclass uniformity.

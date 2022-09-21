@@ -1,5 +1,3 @@
-from __future__ import absolute_import, division, print_function
-
 import functools as _functools
 import types as _types
 from weakref import (
@@ -10,7 +8,7 @@ from weakref import (
     WeakSet,
 )
 
-import six
+import six as _six
 
 try:
     import collections.abc as _collections_abc
@@ -144,7 +142,7 @@ class _MissingMeta(type):
 # Add missing TypeAlias for older Python versions.
 if "TypeAlias" not in globals():
 
-    class TypeAlias(six.with_metaclass(_MissingMeta, object)):  # type: ignore
+    class TypeAlias(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
         pass
 
     _update_all("TypeAlias")
@@ -153,10 +151,19 @@ if "TypeAlias" not in globals():
 # Add missing ClassVar for older Python versions.
 if "ClassVar" not in globals():
 
-    class ClassVar(six.with_metaclass(_MissingMeta, object)):  # type: ignore
+    class ClassVar(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
         pass
 
     _update_all("ClassVar")
+
+
+# Add missing NewType for older Python versions.
+if "NewType" not in globals():
+
+    def NewType(_name, _typ):  # type: ignore
+        return _typ
+
+    _update_all("NewType")
 
 
 # Add missing inspection functions for older Python versions.
@@ -243,7 +250,7 @@ for _base, (_names, _vars) in _GENERIC_TYPES.items():
 # Function to get type name that supports generics.
 _SPECIAL_NAMES = {
     Any: "Any",
-    ClassVar: "ClassVar",
+    ClassVar: "ClassVar",  # noqa
     Optional: "Optional",
     Literal: "Literal",
     Final: "Final",
