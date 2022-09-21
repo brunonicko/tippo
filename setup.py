@@ -1,6 +1,6 @@
 import os
-import setuptools  # type: ignore
 
+import setuptools  # type: ignore
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
@@ -11,7 +11,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="tippo",
-    version="3.2.0",
+    version="3.3.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
     description="Cleaner and forwards compatible way to use typing features.",

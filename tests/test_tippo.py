@@ -6,13 +6,12 @@ except ImportError:
     import collections as collections_abc  # type: ignore
 
 import typing
+
+import pytest
+import six
 import typing_extensions
 
-import six
-import pytest
-
 import tippo
-
 
 T = tippo.TypeVar("T")
 
@@ -47,6 +46,12 @@ def test_missing():
     for missing in ("TypeAlias", "ClassVar"):
         if not hasattr(typing, missing) and not hasattr(typing_extensions, missing):
             assert getattr(tippo, missing)[obj] is obj
+
+
+def test_new_type():
+    if not hasattr(typing, "NewType") and not hasattr(typing_extensions, "NewType"):
+        obj = object()
+        assert getattr(tippo, "NewType")("obj", obj) is obj
 
 
 def test_generic_meta():
