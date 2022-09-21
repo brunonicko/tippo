@@ -1,12 +1,7 @@
 import functools as _functools
 import types as _types
-from weakref import (
-    ref,  # noqa
-    ReferenceType,
-    WeakKeyDictionary,
-    WeakValueDictionary,
-    WeakSet,
-)
+from weakref import ref  # noqa
+from weakref import ReferenceType, WeakKeyDictionary, WeakSet, WeakValueDictionary
 
 import six as _six
 
@@ -22,7 +17,6 @@ from typing import *  # noqa
 # Import typing extensions.
 import typing_extensions as _typing_extensions
 from typing_extensions import *  # type: ignore
-
 
 # Prepare __all__ by combining typing + typing_extensions.
 _all_ = _typing.__all__ + _typing_extensions.__all__  # type: ignore

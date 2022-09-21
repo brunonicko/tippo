@@ -6,13 +6,12 @@ except ImportError:
     import collections as collections_abc  # type: ignore
 
 import typing
+
+import pytest
+import six
 import typing_extensions
 
-import six
-import pytest
-
 import tippo
-
 
 T = tippo.TypeVar("T")
 

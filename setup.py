@@ -1,6 +1,6 @@
 import os
-import setuptools  # type: ignore
 
+import setuptools  # type: ignore
 
 with open("README.rst", "r") as fh:
     long_description = fh.read()
