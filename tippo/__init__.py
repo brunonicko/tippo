@@ -339,3 +339,16 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 
 
 _update_all("get_name")
+
+
+class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
+    def keys(self):
+        # type: () -> Iterable[_KT]
+        pass
+
+    def __getitem__(self, __k):
+        # type: (_KT) -> _VT_co
+        pass
+
+
+_update_all("SupportsKeysAndGetItem")
