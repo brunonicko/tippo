@@ -342,12 +342,25 @@ _update_all("get_name")
 
 
 class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
+    """Protocol that can be used as an input to a dictionary constructor."""
+
     def keys(self):
         # type: () -> Iterable[_KT]
+        """
+        Get keys.
+
+        :return: Keys.
+        """
         pass
 
     def __getitem__(self, __k):
         # type: (_KT) -> _VT_co
+        """
+        Get value for key.
+
+        :param __k: Key.
+        :return: Value.
+        """
         pass
 
 

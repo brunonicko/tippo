@@ -1,5 +1,18 @@
-Tippo
-=====
+.. logo_start
+.. raw:: html
+
+   <p align="center">
+     <a href="https://github.com/brunonicko/tippo">
+         <picture>
+            <object data="./_static/tippo.svg" type="image/png">
+                <source srcset="./docs/source/_static/tippo_white.svg" media="(prefers-color-scheme: dark)">
+                <img src="./docs/source/_static/tippo.svg" width="60%" alt="tippo" />
+            </object>
+         </picture>
+     </a>
+   </p>
+.. logo_end
+
 .. image:: https://github.com/brunonicko/tippo/workflows/MyPy/badge.svg
    :target: https://github.com/brunonicko/tippo/actions?query=workflow%3AMyPy
 

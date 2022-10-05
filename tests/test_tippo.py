@@ -131,6 +131,14 @@ def test_generic_aliases():
 
 
 def test_get_origin():
+    assert tippo.get_origin(tippo.Literal[42]) is tippo.Literal
+    assert tippo.get_origin(int) is None
+    assert tippo.get_origin(tippo.ClassVar[int]) is tippo.ClassVar
+    assert tippo.get_origin(tippo.Generic) is tippo.Generic
+    assert tippo.get_origin(tippo.Generic[T]) is tippo.Generic
+    assert tippo.get_origin(tippo.Union[T, int]) is tippo.Union
+    assert tippo.get_origin(tippo.List[tippo.Tuple[T, T]][int]) in (list, tippo.List)
+
     assert tippo.get_origin(tippo.Callable) in (tippo.Callable, collections_abc.Callable)
     assert tippo.get_origin(tippo.Tuple) in (tippo.Tuple, tuple)
     assert tippo.get_origin(tippo.Dict) in (tippo.Dict, dict)
@@ -161,6 +169,12 @@ def test_get_origin():
 
 
 def test_get_args():
+    assert tippo.get_args(tippo.Dict[str, int]) == (str, int)
+    assert tippo.get_args(int) == ()
+    assert tippo.get_args(tippo.Union[int, tippo.Union[T, int], str][int]) == (int, str)
+    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]][str]) == (int, tippo.Tuple[str, int])
+    assert tippo.get_args(tippo.Callable[[], T][int]) == ([], int)
+
     assert tippo.get_args(tippo.Dict) == ()
     assert tippo.get_args(int) == ()
     assert tippo.get_args(None) == ()
