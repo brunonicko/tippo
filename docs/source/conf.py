@@ -1,3 +1,5 @@
+# type: ignore
+
 import os
 import sys
 
@@ -11,7 +13,19 @@ copyright = "2022, Bruno Nicko"  # noqa
 author = "Bruno Nicko"
 
 # Sphinx extensions.
-extensions = ["sphinx_rtd_theme"]
+extensions = [
+    "sphinx.ext.intersphinx",
+    "sphinx.ext.autosectionlabel",
+    "sphinx.ext.autodoc",
+    "sphinx_rtd_theme",
+]
+
+# Intersphinx configuration.
+intersphinx_mapping = {
+    "six": ("https://six.readthedocs.io/", None),
+    "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
+    "python": ("https://docs.python.org/3.10", None),
+}
 
 # The suffix(es) of source filenames.
 source_suffix = [".rst"]
@@ -24,12 +38,15 @@ language = "en"
 
 # List of patterns to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = []  # type: list[str]
+exclude_patterns = []
 
 # The name of the Pygments (syntax highlighting) style to use.
 pygments_style = "monokai"
 
 # HTML options.
 html_theme = "sphinx_rtd_theme"
-html_theme_options = {}  # type: dict
+html_theme_options = {
+    "style_external_links": False,
+    "style_nav_header_background": "#9966CC",
+}
 html_static_path = ["_static"]
