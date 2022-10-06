@@ -345,18 +345,40 @@ _update_all("get_name")
 class SupportsGetItem(Protocol[_KT_contra, _VT_co]):
     """Subscritable protocol."""
 
-    def __getitem__(self, __k):
+    def __getitem__(self, _k):
         # type: (_KT_contra) -> _VT_co
         """
         Get value for key.
 
-        :param __k: Key.
+        :param _k: Key.
         :return: Value.
         """
         pass
 
 
 _update_all("SupportsGetItem")
+
+
+class SupportsGetSetItem(SupportsGetItem):
+    """Settable and subscritable protocol."""
+
+    def __setitem__(self, name, value):
+        # type: (str, Any) -> None
+        pass
+
+
+_update_all("SupportsGetSetItem")
+
+
+class SupportsGetSetDeleteItem(SupportsGetSetItem):
+    """Settable, deletable, and subscritable protocol."""
+
+    def __delitem__(self, name):
+        # type: (str) -> None
+        pass
+
+
+_update_all("SupportsGetSetDeleteItem")
 
 
 class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
@@ -371,12 +393,12 @@ class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
         """
         pass
 
-    def __getitem__(self, __k):
+    def __getitem__(self, _k):
         # type: (_KT) -> _VT_co
         """
         Get value for key.
 
-        :param __k: Key.
+        :param _k: Key.
         :return: Value.
         """
         pass
