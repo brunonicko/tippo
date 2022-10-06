@@ -191,6 +191,52 @@ if "get_args" not in globals():
     _update_all("get_args")
 
 
+if "dataclass_transform" not in globals():
+
+    def _dataclass_transform(
+        eq_default=True,  # type: bool
+        order_default=False,  # type: bool
+        kw_only_default=False,  # type: bool
+        field_specifiers=(),  # type: tuple[Union[Type[Any], Callable[..., Any]], ...]
+        **kwargs  # type: Any
+    ):
+        # type: (...) -> Callable[[_T], _T]
+        """
+        Decorator that marks a function, class, or metaclass as providing dataclass-like behavior.
+
+        The arguments to this decorator can be used to customize this behavior:
+        - `eq_default` indicates whether the `eq` parameter is assumed to be True or False if it is omitted by the
+          caller.
+        - `order_default` indicates whether the `order` parameter is assumed to be True or False if it is omitted by
+          the caller.
+        - `kw_only_default` indicates whether the `kw_only` parameter is assumed to be True or False if it is omitted
+          by the caller.
+        - `field_specifiers` specifies a static list of supported classes or functions that describe fields, similar
+          to `dataclasses.field()`.
+
+        At runtime, this decorator records its arguments in the `__dataclass_transform__` attribute on the decorated
+        object.
+
+        See PEP 681 for more details.
+        """
+
+        def decorator(cls_or_fn):
+            cls_or_fn.__dataclass_transform__ = {
+                "eq_default": eq_default,
+                "order_default": order_default,
+                "kw_only_default": kw_only_default,
+                "field_specifiers": field_specifiers,
+                "kwargs": kwargs,
+            }
+            return cls_or_fn
+
+        return decorator
+
+    _dataclass_transform.__name__ = "dataclass_transform"
+    globals()["dataclass_transform"] = _dataclass_transform
+    _update_all("dataclass_transform")
+
+
 # Build missing generic types.
 _GenericInfo = _typing.NamedTuple(
     "_GenericInfo",

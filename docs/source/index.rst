@@ -11,6 +11,8 @@ Documentation
 
 .. autofunction:: tippo.get_args
 
+.. autofunction:: tippo.dataclass_transform
+
 .. autofunction:: tippo.get_name
 
 .. autoclass:: tippo.GenericMeta
