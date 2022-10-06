@@ -15,5 +15,8 @@ Documentation
 
 .. autoclass:: tippo.GenericMeta
 
+.. autoclass:: tippo.SupportsGetItem
+   :members: __getitem__
+
 .. autoclass:: tippo.SupportsKeysAndGetItem
    :members: keys, __getitem__

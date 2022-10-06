@@ -202,6 +202,7 @@ _GenericInfo = _typing.NamedTuple(
 
 _T = _typing.TypeVar("_T")
 _KT = _typing.TypeVar("_KT")
+_KT_contra = _typing.TypeVar("_KT_contra", contravariant=True)
 _VT_co = _typing.TypeVar("_VT_co", covariant=True)
 _T_co = _typing.TypeVar("_T_co", covariant=True)
 
@@ -339,6 +340,23 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 
 
 _update_all("get_name")
+
+
+class SupportsGetItem(Protocol[_KT_contra, _VT_co]):
+    """Subscritable protocol."""
+
+    def __getitem__(self, __k):
+        # type: (_KT_contra) -> _VT_co
+        """
+        Get value for key.
+
+        :param __k: Key.
+        :return: Value.
+        """
+        pass
+
+
+_update_all("SupportsGetItem")
 
 
 class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
