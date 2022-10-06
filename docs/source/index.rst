@@ -18,5 +18,11 @@ Documentation
 .. autoclass:: tippo.SupportsGetItem
    :members: __getitem__
 
+.. autoclass:: tippo.SupportsGetSetItem
+   :members: __getitem__
+
+.. autoclass:: tippo.SupportsGetSetDeleteItem
+   :members: __getitem__
+
 .. autoclass:: tippo.SupportsKeysAndGetItem
    :members: keys, __getitem__

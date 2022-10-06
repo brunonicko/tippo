@@ -24,7 +24,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="tippo",
-    version="3.6.0",
+    version="3.7.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
     description="Cleaner and compatible way to use typing features.",
