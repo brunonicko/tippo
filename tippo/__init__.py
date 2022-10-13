@@ -121,9 +121,12 @@ _update_all("GenericMeta")
 # Add missing final decorator for older Python versions.
 if "final" not in globals():
 
-    def final(f):  # type: ignore
+    def _final(f):  # type: ignore
         """A decorator to indicate final methods and final classes."""
         return f
+
+    _final.__name__ = _final.__qualname__ = "_final"
+    globals()["final"] = _final
 
     _update_all("final")
 
@@ -136,8 +139,11 @@ class _MissingMeta(type):
 # Add missing TypeAlias for older Python versions.
 if "TypeAlias" not in globals():
 
-    class TypeAlias(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
+    class _TypeAlias(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
         pass
+
+    _TypeAlias.__name__ = _TypeAlias.__qualname__ = "_TypeAlias"
+    globals()["TypeAlias"] = _TypeAlias
 
     _update_all("TypeAlias")
 
@@ -145,27 +151,45 @@ if "TypeAlias" not in globals():
 # Add missing ClassVar for older Python versions.
 if "ClassVar" not in globals():
 
-    class ClassVar(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
+    class _ClassVar(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
         pass
 
-    _update_all("ClassVar")
+    _ClassVar.__name__ = _ClassVar.__qualname__ = "_ClassVar"
+    globals()["ClassVar"] = _ClassVar
+
+    _update_all("_ClassVar")
 
 
 # Add missing NewType for older Python versions.
 if "NewType" not in globals():
 
-    def NewType(_name, _typ):  # type: ignore
+    def _NewType(_name, _typ):  # type: ignore
         return _typ
+
+    _NewType.__name__ = _NewType.__qualname__ = "NewType"
+    globals()["NewType"] = _NewType
 
     _update_all("NewType")
 
 
+# Add missing Self type for older Python versions.
+if "Self" not in globals():
+
+    def _Self():  # type: ignore
+        error = "can't instantiate tippo.Self"
+        raise TypeError(error)
+
+    _Self.__name__ = _Self.__qualname__ = "Self"
+    globals()["Self"] = _Self
+
+    _update_all("Self")
+
+
 # Add missing inspection functions for older Python versions.
 if "get_origin" not in globals():
-    from typing_inspect import get_origin as _get_origin  # type: ignore
+    from typing_inspect import get_origin as _typing_inspect_get_origin  # type: ignore
 
-    @_functools.wraps(_get_origin)
-    def get_origin(typ):
+    def _get_origin(typ):
         if typ is Generic:
             return Generic
 
@@ -176,17 +200,24 @@ if "get_origin" not in globals():
             if type(typ) is getattr(_typing, name, None):
                 return origin
 
-        return _get_origin(typ)
+        return _typing_inspect_get_origin(typ)
+
+    _get_origin.__name__ = _get_origin.__qualname__ = "get_origin"
+    _get_origin.__doc__ = _typing_inspect_get_origin.__doc__
+    globals()["get_origin"] = _get_origin
 
     _update_all("get_origin")
 
 
 if "get_args" not in globals():
-    from typing_inspect import get_args as _get_args  # type: ignore
+    from typing_inspect import get_args as _typing_inspect_get_args  # type: ignore
 
-    @_functools.wraps(_get_args)
-    def get_args(typ):
-        return _get_args(typ, True)
+    def _get_args(typ):
+        return _typing_inspect_get_args(typ, True)
+
+    _get_args.__name__ = _get_args.__qualname__ = "get_args"
+    _get_args.__doc__ = _typing_inspect_get_args.__doc__
+    globals()["get_args"] = _get_args
 
     _update_all("get_args")
 
@@ -232,8 +263,9 @@ if "dataclass_transform" not in globals():
 
         return decorator
 
-    _dataclass_transform.__name__ = "dataclass_transform"
+    _dataclass_transform.__name__ = _dataclass_transform.__qualname__ = "dataclass_transform"
     globals()["dataclass_transform"] = _dataclass_transform
+
     _update_all("dataclass_transform")
 
 

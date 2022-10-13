@@ -36,6 +36,7 @@ def test_all():
     assert "final" in tippo._all_
     assert "TypeAlias" in tippo._all_
     assert "ClassVar" in tippo._all_
+    assert "Self" in tippo._all_
     assert "get_origin" in tippo._all_
     assert "get_args" in tippo._all_
     assert "get_name" in tippo._all_
