@@ -24,7 +24,7 @@ extensions = [
 intersphinx_mapping = {
     "six": ("https://six.readthedocs.io/", None),
     "sphinx": ("https://www.sphinx-doc.org/en/master/", None),
-    "python": ("https://docs.python.org/3.10", None),
+    "python": ("https://docs.python.org/3.11", None),
 }
 
 # The suffix(es) of source filenames.
