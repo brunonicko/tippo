@@ -9,7 +9,7 @@ sys.path.insert(0, root_path)
 
 # Project information.
 project = "Tippo"
-copyright = "2022, Bruno Nicko"  # noqa
+copyright = "2023, Bruno Nicko"  # noqa
 author = "Bruno Nicko"
 
 # Sphinx extensions.

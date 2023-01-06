@@ -24,10 +24,10 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="tippo",
-    version="3.10.0",
+    version="3.11.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
-    description="Cleaner and compatible way to use typing features.",
+    description="Use the latest type annotation features in older versions of Python.",
     long_description=long_description,
     long_description_content_type="text/x-rst",
     url="https://github.com/brunonicko/tippo",

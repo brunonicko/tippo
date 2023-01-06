@@ -36,20 +36,32 @@
 
 Overview
 --------
-`Tippo` provides a cleaner and compatible way to use features from both `typing` and `typing_extension` across a wide
-range of Python versions, including Python 2.7.
+Use the latest type annotation features in older versions of Python.
 
-Example
--------
+Motivation
+----------
+When working with Python development for VFX pipelines we are often stuck with older Python versions for the runtime.
 
-Instead of using an ugly try block for forwards compatibility...
+`Tippo` aims to bridge that gap since it allows us to use features such as static type checking (which could be
+performed by newer Python versions with support for MyPy during the testing phase) even though the code might be
+designed to run in Python 2.7, for example.
+
+Installation
+------------
+`Tippo` is available through `pip`:
+
+``pip install tippo``
+
+Usage
+-----
+Instead of importing from `typing` and/or `typing_extensions`...
 
 .. code:: python
 
     >>> try:
-    ...     from typing import Generic
+    ...     from typing import TypeAlias
     ... except ImportError:
-    ...     from typing_extensions import Generic
+    ...     from typing_extensions import TypeAlias
     ...
     >>> try:
     ...     from typing import final
@@ -57,7 +69,7 @@ Instead of using an ugly try block for forwards compatibility...
     ...     from typing_extensions import final
     ...
 
-...just import directly from `tippo`!
+...just import directly from `tippo`:
 
 .. code:: python
 
@@ -92,13 +104,12 @@ Subclassing a generic class with a `__weakref__` slot:
     >>> instance = SubClass()
     >>> instance_ref = ref(instance)
 
-Also, in order to maintain the same interface, `GenericMeta` points to `type` when imported from `tippo` in newer
-versions of Python.
+In order to maintain the same interface, `GenericMeta` points to `type` when imported from `tippo` in newer versions of
+Python.
 
-Missing Features
-----------------
-`Tippo` back-ports some features from future versions of Python to older ones, such as `TypeAlias`, `ClassVar`,
-`NewType`, `get_origin`, and `get_args`.
+Backports
+---------
+Features from the latest versions of Python, such as `TypeAlias`, `ClassVar`, `NewType`, `get_origin`, and `get_args`.
 
 .. code:: python
 
@@ -109,16 +120,38 @@ Missing Features
 
 Generic Weak Structures
 -----------------------
-
-`Tippo` also implements generic versions of weak data structures that work with older Python versions' type annotations
-without the need to defer their evaluation:
+Generic versions of weak data structures that work with older Python versions' type annotations.
 
 .. code:: python
 
-    >>> from tippo import Any, ReferenceType, WeakSet, WeakKeyDictionary, WeakValueDictionary
+    >>> from tippo import Any, ReferenceType, WeakSet, WeakKeyDictionary, WeakValueDictionary, TypeAlias
     >>> class Foo(object):
     ...     pass
-    >>> weak_ref = ReferenceType[Foo](Foo())
-    >>> weak_set = WeakSet[Foo]({Foo()})
-    >>> weak_key_dict = WeakKeyDictionary[Foo, Any]({Foo(): "foo"})
-    >>> weak_value_dict = WeakValueDictionary[Any, Foo]({"foo": Foo()})
+    >>> FooWeakRef = ReferenceType[Foo]  # type: TypeAlias
+    >>> FooWeakSet = WeakSet[Foo]  # type: TypeAlias
+    >>> FooWeakKeyDictionary = WeakKeyDictionary[Foo, Any]  # type: TypeAlias
+    >>> FooWeakValueDictionary = WeakValueDictionary[Any, Foo]  # type: TypeAlias
+
+Commonly Used Protocols
+-----------------------
+Such as:
+
+- `tippo.SupportsGetItem`
+- `tippo.SupportsGetSetItem`
+- `tippo.SupportsGetSetDeleteItem`
+- `tippo.SupportsKeysAndGetItem`
+
+.. code:: python
+
+    >>> from tippo import SupportsGetItem
+    >>> class Foo(object):
+    ...     def __getitem__(self, item):
+    ...         # type: (str) -> int
+    ...         return 3
+    ...
+    >>> def get_stuff(bar):
+    ...     # type: (SupportsGetItem[str, int]) -> int
+    ...     return bar["stuff"]
+    ...
+    >>> assert get_stuff(Foo()) == 3  # passes static type checking
+    >>> assert get_stuff({"stuff": 3}) == 3  # passes static type checking

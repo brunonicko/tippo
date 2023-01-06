@@ -8,7 +8,7 @@ from invoke import task  # type: ignore  # noqa
 
 @task
 def conform(c):
-    c.run("isort tippo tests ./docs/source/conf.py setup.py -m 3 -l 88 --up --tc --lbt 0")
+    c.run("isort tests ./docs/source/conf.py setup.py -m 3 -l 88 --up --tc --lbt 0")
     c.run("black tippo --line-length=120")
     c.run("black tests --line-length=120")
     c.run("black setup.py --line-length=120")
@@ -16,7 +16,7 @@ def conform(c):
 
 @task
 def lint(c):
-    c.run("isort tippo tests ./docs/source/conf.py setup.py -m 3 -l 88 --up --tc --lbt 0 --check-only")
+    c.run("isort tests ./docs/source/conf.py setup.py -m 3 -l 88 --up --tc --lbt 0 --check-only")
     c.run("black tippo --line-length=120 --check")
     c.run("black tests --line-length=120 --check")
     c.run("black setup.py --line-length=120 --check")
