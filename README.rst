@@ -73,7 +73,7 @@ Instead of importing from `typing` and/or `typing_extensions`...
 
 .. code:: python
 
-    >>> from tippo import Generic, final
+    >>> from tippo import TypeAlias, final
 
 Generic Fixes
 -------------
