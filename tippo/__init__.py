@@ -1,21 +1,17 @@
 import functools as _functools
 import types as _types
+
+# Import typing.
+import typing as _typing
+from typing import *  # noqa
 from weakref import ref  # noqa
 from weakref import ReferenceType, WeakKeyDictionary, WeakSet, WeakValueDictionary
 
 import six as _six
 
-try:
-    import collections.abc as _collections_abc
-except ImportError:
-    import collections as _collections_abc  # type: ignore
-
-# Import typing.
-import typing as _typing
-from typing import *  # noqa
-
 # Import typing extensions.
 import typing_extensions as _typing_extensions
+from six.moves import collections_abc as _collections_abc
 from typing_extensions import *  # type: ignore
 
 # Prepare __all__ by combining typing + typing_extensions.
@@ -47,7 +43,7 @@ _BUILTINS_MAPPING = {
 _BUILTINS_MAPPING.update(
     dict(
         (getattr(_typing, n, getattr(_typing_extensions, n, None)), getattr(_collections_abc, n))
-        for n in set(_collections_abc.__all__).intersection(
+        for n in set(getattr(_collections_abc, "__all__")).intersection(
             _typing.__all__ + _typing_extensions.__all__  # type: ignore
         )
         if not n.startswith("_")
@@ -328,6 +324,7 @@ _SPECIAL_NAMES = {
     Literal: "Literal",
     Final: "Final",
     Union: "Union",
+    Self: "Self",
     ForwardRef: "ForwardRef",
     Ellipsis: "...",
     None: "None",

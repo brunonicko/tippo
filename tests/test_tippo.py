@@ -1,15 +1,9 @@
-from __future__ import absolute_import, division, print_function
-
-try:
-    import collections.abc as collections_abc
-except ImportError:
-    import collections as collections_abc  # type: ignore
-
 import typing
 
 import pytest
 import six
 import typing_extensions
+from six.moves import collections_abc
 
 import tippo
 
@@ -226,6 +220,7 @@ def test_get_name():
     assert tippo.get_name(tippo.Union) == "Union"
     assert tippo.get_name(tippo.Mapping) == "Mapping"
     assert tippo.get_name(tippo.Union) == "Union"
+    assert tippo.get_name(tippo.Self) == "Self"
     assert tippo.get_name(tippo.List) == "List"
     assert tippo.get_name(tippo.Dict) == "Dict"
     assert tippo.get_name(tippo.Set) == "Set"
