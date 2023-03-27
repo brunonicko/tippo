@@ -86,9 +86,10 @@ else:
     class _Class(Generic[_T]):
         pass
 
-    # Apply fixes for Python 2 if needed.
-    if (_Class[int] != _Class[(int,)]) is not False:
-        # Fix not equal operator logic in python 2.
+    # Fix not equal operator logic in python 2.
+    need_ne_fix = (_Class[int] != _Class[(int,)]) is not False
+    if need_ne_fix:
+
         def __ne__(cls, other):
             is_equal = cls == other
             if is_equal is NotImplemented:
@@ -99,7 +100,21 @@ else:
         __ne__.__module__ = _GenericMeta.__module__
         type.__setattr__(_GenericMeta, "__ne__", __ne__)
 
-        # Fix subclassing slotted generic class with __weakref__.
+    # Fix subclassing slotted generic class with __weakref__.
+    class _SlottedClass(Generic[_T]):
+        __slots__ = ("__weakref__",)
+
+    try:
+
+        class _SlottedSubClass(_SlottedClass[_T]):
+            __slots__ = ()
+
+    except TypeError:
+        need_weakref_fix = True
+    else:
+        need_weakref_fix = False
+
+    if need_weakref_fix:
         _original_getitem = getattr(_GenericMeta, "__getitem__")
 
         @_functools.wraps(_original_getitem)
