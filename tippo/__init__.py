@@ -8,12 +8,19 @@ import typing_extensions as _typing_extensions
 from six.moves import collections_abc as _collections_abc
 from typing_extensions import *  # type: ignore
 
+_T = TypeVar("_T")
+_KT_contra = TypeVar("_KT_contra", contravariant=True)
+_VT_co = TypeVar("_VT_co", covariant=True)
+_KT = TypeVar("_KT")
+
+
 # Prepare __all__ by combining typing + typing_extensions.
-_all_ = _typing.__all__ + _typing_extensions.__all__  # type: ignore
+_all_ = _typing.__all__ + _typing_extensions.__all__
 globals()["__all__"] = _all_
 
 
 def _update_all(*_members):
+    # type: (*str) -> None
     _all_.extend(set(_members).difference(_all_))
 
 
@@ -33,7 +40,7 @@ _BUILTINS_MAPPING = {
     Dict: dict,
     Tuple: tuple,
     Type: type,
-}
+}  # type: Dict[Any, Any]
 _BUILTINS_MAPPING.update(
     dict(
         (
@@ -41,7 +48,7 @@ _BUILTINS_MAPPING.update(
             getattr(_collections_abc, n),
         )
         for n in set(getattr(_collections_abc, "__all__")).intersection(
-            _typing.__all__ + _typing_extensions.__all__  # type: ignore
+            _typing.__all__ + _typing_extensions.__all__
         )
         if not n.startswith("_")
     )
@@ -51,6 +58,7 @@ _TYPING_MAPPING = dict((b, t) for t, b in _BUILTINS_MAPPING.items())
 
 
 def get_builtin(typ):
+    # type: (_T) -> _T
     """
     Get equivalent builtin.
 
@@ -61,6 +69,7 @@ def get_builtin(typ):
 
 
 def get_typing(typ):
+    # type: (_T) -> _T
     """
     Get equivalent typing.
 
@@ -71,9 +80,6 @@ def get_typing(typ):
 
 
 _update_all("get_builtin", "get_typing")
-
-
-_T = TypeVar("_T")
 
 
 # Patch GenericMeta for Python 2.7 with some fixes.
@@ -91,6 +97,7 @@ else:
     if need_ne_fix:
 
         def __ne__(cls, other):
+            # type: (Type[Any], object) -> bool
             is_equal = cls == other
             if is_equal is NotImplemented:
                 return NotImplemented
@@ -119,6 +126,7 @@ else:
 
         @_functools.wraps(_original_getitem)
         def __getitem__(cls, params):
+            # type: (Type[_T], Any) -> Type[_T]
             slots = getattr(cls, "__slots__", None)
             if slots is not None and "__weakref__" in slots:
                 type.__setattr__(
@@ -151,6 +159,7 @@ if "final" not in globals():
 
 class _MissingMeta(type):
     def __getitem__(cls, _):
+        # type: (Any) -> Type[Any]
         return cls
 
 
@@ -208,6 +217,7 @@ if "get_origin" not in globals():
     from typing_inspect import get_origin as _typing_inspect_get_origin  # type: ignore
 
     def _get_origin(typ):
+        # type: (Any) -> Any
         if typ is Generic:
             return Generic
 
@@ -232,9 +242,10 @@ if "get_origin" not in globals():
 
 
 if "get_args" not in globals():
-    from typing_inspect import get_args as _typing_inspect_get_args  # type: ignore
+    from typing_inspect import get_args as _typing_inspect_get_args
 
     def _get_args(typ):
+        # type: (Any) -> Any
         return _typing_inspect_get_args(typ, True)
 
     _get_args.__name__ = _get_args.__qualname__ = "get_args"
@@ -275,7 +286,8 @@ if "dataclass_transform" not in globals():
         """
 
         def decorator(cls_or_fn):
-            cls_or_fn.__dataclass_transform__ = {
+            # type: (_T) -> _T
+            cls_or_fn.__dataclass_transform__ = {  # type: ignore
                 "eq_default": eq_default,
                 "order_default": order_default,
                 "kw_only_default": kw_only_default,
@@ -397,10 +409,6 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 _update_all("get_name")
 
 
-_KT_contra = TypeVar("_KT_contra", contravariant=True)
-_VT_co = TypeVar("_VT_co", covariant=True)
-
-
 class SupportsGetItem(Protocol[_KT_contra, _VT_co]):
     """Subscritable protocol."""
 
@@ -418,7 +426,7 @@ class SupportsGetItem(Protocol[_KT_contra, _VT_co]):
 _update_all("SupportsGetItem")
 
 
-class SupportsGetSetItem(SupportsGetItem):
+class SupportsGetSetItem(SupportsGetItem[_KT_contra, _VT_co]):
     """Settable and subscritable protocol."""
 
     def __setitem__(self, name, value):
@@ -429,7 +437,7 @@ class SupportsGetSetItem(SupportsGetItem):
 _update_all("SupportsGetSetItem")
 
 
-class SupportsGetSetDeleteItem(SupportsGetSetItem):
+class SupportsGetSetDeleteItem(SupportsGetSetItem[_KT_contra, _VT_co]):
     """Settable, deletable, and subscritable protocol."""
 
     def __delitem__(self, name):
@@ -438,9 +446,6 @@ class SupportsGetSetDeleteItem(SupportsGetSetItem):
 
 
 _update_all("SupportsGetSetDeleteItem")
-
-
-_KT = TypeVar("_KT")
 
 
 class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):

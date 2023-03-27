@@ -1,3 +1,5 @@
+# type: ignore
+
 from invoke import task
 
 PATHS = "tippo setup.py tasks.py docs/source/conf.py tests"
@@ -25,7 +27,7 @@ def lint(c):
 
 @task
 def mypy(c):
-    c.run("mypy tippo")
+    c.run("mypy tippo --strict")
 
 
 @task
