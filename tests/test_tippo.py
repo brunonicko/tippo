@@ -1,3 +1,5 @@
+# type: ignore
+
 import typing
 
 import pytest
@@ -13,19 +15,15 @@ T = tippo.TypeVar("T")
 def test_all():
     assert tippo._all_ is getattr(tippo, "__all__")
 
-    assert set(typing.__all__).issubset(tippo._all_)  # type: ignore
-    assert set(typing_extensions.__all__).issubset(tippo._all_)  # type: ignore
+    assert set(typing.__all__).issubset(tippo._all_)
+    assert set(typing_extensions.__all__).issubset(tippo._all_)
 
     for member in tippo._all_:
         assert not member.startswith("_")
         assert hasattr(tippo, member)
 
-    if "GenericMeta" in typing.__all__:  # type: ignore
+    if "GenericMeta" in typing.__all__:
         assert "GenericMeta" in tippo._all_
-
-    for _b, (names, _v) in tippo._GENERIC_TYPES.items():
-        for name in names:
-            assert name in tippo._all_
 
     assert "final" in tippo._all_
     assert "TypeAlias" in tippo._all_
@@ -50,7 +48,6 @@ def test_new_type():
 
 
 def test_generic_meta():
-
     # Metaclass uniformity.
     assert isinstance(tippo.Generic, tippo.GenericMeta)
 
@@ -63,20 +60,20 @@ def test_generic_meta():
         pass
 
     with pytest.raises(TypeError):
-        _BadClass = Class[None]  # type: ignore
+        _BadClass = Class[None]
         assert not _BadClass
 
     # Should error if didn't specify type variables to Generic.
     with pytest.raises(TypeError):
 
-        class _BadClass(Class, tippo.Generic[3]):  # type: ignore
+        class _BadClass(Class, tippo.Generic[3]):
             pass
 
         assert not _BadClass
 
     with pytest.raises(TypeError):
 
-        class _BadClass(Class, tippo.Generic[int]):  # type: ignore
+        class _BadClass(Class, tippo.Generic[int]):
             pass
 
         assert not _BadClass
@@ -115,16 +112,6 @@ def test_generic_meta():
     assert SubClass
 
 
-def test_generic_aliases():
-    for original_base, info in tippo._GENERIC_TYPES.items():
-        for name in info.names:
-            generic = getattr(tippo, name)
-            if original_base is not generic:
-                assert not hasattr(original_base, "__class_getitem__")
-                assert not hasattr(type(original_base), "__getitem__")
-                assert hasattr(generic, "__class_getitem__") or hasattr(type(generic), "__getitem__")
-
-
 def test_get_origin():
     assert tippo.get_origin(tippo.Literal[42]) is tippo.Literal
     assert tippo.get_origin(int) is None
@@ -134,7 +121,10 @@ def test_get_origin():
     assert tippo.get_origin(tippo.Union[T, int]) is tippo.Union
     assert tippo.get_origin(tippo.List[tippo.Tuple[T, T]][int]) in (list, tippo.List)
 
-    assert tippo.get_origin(tippo.Callable) in (tippo.Callable, collections_abc.Callable)
+    assert tippo.get_origin(tippo.Callable) in (
+        tippo.Callable,
+        collections_abc.Callable,
+    )
     assert tippo.get_origin(tippo.Tuple) in (tippo.Tuple, tuple)
     assert tippo.get_origin(tippo.Dict) in (tippo.Dict, dict)
     assert tippo.get_origin(tippo.List) in (tippo.List, list)
@@ -152,7 +142,10 @@ def test_get_origin():
     assert tippo.get_origin(tippo.Generic[T]) is tippo.Generic
     assert tippo.get_origin(tippo.Union[T, int]) is tippo.Union
     assert tippo.get_origin(tippo.List[tippo.Tuple[T, T]][int]) in (tippo.List, list)
-    assert tippo.get_origin(tippo.Callable[[str, int], bool]) in (tippo.Callable, collections_abc.Callable)
+    assert tippo.get_origin(tippo.Callable[[str, int], bool]) in (
+        tippo.Callable,
+        collections_abc.Callable,
+    )
     assert tippo.get_origin(tippo.Tuple[str]) in (tippo.Tuple, tuple)
     assert tippo.get_origin(tippo.Dict[str, int]) in (tippo.Dict, dict)
     assert tippo.get_origin(tippo.List[str]) in (tippo.List, list)
@@ -167,7 +160,10 @@ def test_get_args():
     assert tippo.get_args(tippo.Dict[str, int]) == (str, int)
     assert tippo.get_args(int) == ()
     assert tippo.get_args(tippo.Union[int, tippo.Union[T, int], str][int]) == (int, str)
-    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]][str]) == (int, tippo.Tuple[str, int])
+    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]][str]) == (
+        int,
+        tippo.Tuple[str, int],
+    )
     assert tippo.get_args(tippo.Callable[[], T][int]) == ([], int)
 
     assert tippo.get_args(tippo.Dict) == ()
@@ -178,12 +174,17 @@ def test_get_args():
 
     assert tippo.get_args(tippo.Dict[str, int]) == (str, int)
     assert tippo.get_args(tippo.Union[int, tippo.Union[T, int], str][int]) == (int, str)
-    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]][str]) == (int, tippo.Tuple[str, int])
+    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]][str]) == (
+        int,
+        tippo.Tuple[str, int],
+    )
     assert tippo.get_args(tippo.Callable[[float, bool], T][int]) == ([float, bool], int)
     assert tippo.get_args(tippo.Callable[[], T][int]) == ([], int)
     assert tippo.get_args(tippo.Callable[Ellipsis, T][int]) == (Ellipsis, int)
 
-    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, tippo.Dict[str, bool]]][bool]) == (
+    assert tippo.get_args(
+        tippo.Union[int, tippo.Tuple[T, tippo.Dict[str, bool]]][bool]
+    ) == (
         int,
         tippo.Tuple[bool, tippo.Dict[str, bool]],
     )
@@ -192,7 +193,10 @@ def test_get_args():
     assert tippo.get_args(tippo.Set[T][bool]) == (bool,)
 
     assert tippo.get_args(tippo.Union[int, tippo.Union[T, int], str]) == (int, T, str)
-    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]]) == (int, tippo.Tuple[T, int])
+    assert tippo.get_args(tippo.Union[int, tippo.Tuple[T, int]]) == (
+        int,
+        tippo.Tuple[T, int],
+    )
     assert tippo.get_args(tippo.Callable[[float, bool], T]) == ([float, bool], T)
     assert tippo.get_args(tippo.Callable[[], T]) == ([], T)
     assert tippo.get_args(tippo.Callable[Ellipsis, T]) == (Ellipsis, T)

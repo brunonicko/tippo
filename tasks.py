@@ -1,30 +1,26 @@
-import inspect
+from invoke import task
 
-if not hasattr(inspect, "getargspec"):
-    inspect.getargspec = inspect.getfullargspec  # type: ignore
-
-from invoke import task  # type: ignore  # noqa
+PATHS = "tippo setup.py tasks.py docs/source/conf.py tests"
 
 
 @task
 def conform(c):
-    c.run("isort tests ./docs/source/conf.py setup.py -m 3 -l 88 --up --tc --lbt 0")
-    c.run("black tippo --line-length=120")
-    c.run("black tests --line-length=120")
-    c.run("black setup.py --line-length=120")
+    c.run("isort {} -m 3 -l 88 --up --tc --lbt 0".format(PATHS))
+    c.run("black {}".format(PATHS))
 
 
 @task
 def lint(c):
-    c.run("isort tests ./docs/source/conf.py setup.py -m 3 -l 88 --up --tc --lbt 0 --check-only")
-    c.run("black tippo --line-length=120 --check")
-    c.run("black tests --line-length=120 --check")
-    c.run("black setup.py --line-length=120 --check")
-
-    c.run("flake8 tippo --count --select=E9,F63,F7,F82 --show-source --statistics")
-    c.run("flake8 tests --count --select=E9,F63,F7,F82 --show-source --statistics")
-    c.run("flake8 tippo --count --ignore=F811,F405,F403,F401,E203,E731,C901,W503 --max-line-length=120 --statistics")
-    c.run("flake8 tests --count --ignore=F811,F405,F403,F401,E203,E731,C901,W503 --max-line-length=120 --statistics")
+    c.run("isort {} -m 3 -l 88 --up --tc --lbt 0 --check-only".format(PATHS))
+    c.run("black {} --check".format(PATHS))
+    c.run(
+        "flake8 {} --count --select=E9,F63,F7,F82 --max-line-length 88 --show-source "
+        "--statistics".format(PATHS)
+    )
+    c.run(
+        "flake8 {} --count --ignore=F811,F405,F403,F401,E203,E731,C901,W503 "
+        "--max-line-length 88 --statistics".format(PATHS)
+    )
 
 
 @task
