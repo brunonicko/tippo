@@ -5,7 +5,10 @@
      <a href="https://github.com/brunonicko/tippo">
          <picture>
             <object data="./_static/tippo.svg" type="image/png">
-                <source srcset="./docs/source/_static/tippo_white.svg" media="(prefers-color-scheme: dark)">
+                <source
+                    srcset="./docs/source/_static/tippo_white.svg"
+                    media="(prefers-color-scheme: dark)"
+                />
                 <img src="./docs/source/_static/tippo.svg" width="60%" alt="tippo" />
             </object>
          </picture>
@@ -40,11 +43,13 @@ Use the latest type annotation features in older versions of Python.
 
 Motivation
 ----------
-When working with Python development for VFX pipelines we are often stuck with older Python versions for the runtime.
+When working with Python development for VFX pipelines we are often stuck with older
+Python versions for the runtime.
 
-`Tippo` aims to bridge that gap since it allows us to use features such as static type checking (which could be
-performed by newer Python versions with support for MyPy during the testing phase) even though the code might be
-designed to run in Python 2.7, for example.
+`Tippo` aims to bridge that gap since it allows us to use features such as static type
+checking (which could be performed by newer Python versions with support for MyPy during
+the testing phase) even though the code might be designed to run in Python 2.7, for
+example.
 
 Installation
 ------------
@@ -77,8 +82,8 @@ Instead of importing from `typing` and/or `typing_extensions`...
 
 Generic Fixes
 -------------
-`Tippo` patches `GenericMeta` to fix known bugs for the Python 2.7 version of `typing` that were not addressed since
-it's not officially supported anymore.
+`Tippo` patches `GenericMeta` to fix known bugs for the Python 2.7 version of `typing`
+that were not addressed since it's not officially supported anymore.
 
 Generic class comparison:
 
@@ -104,12 +109,13 @@ Subclassing a generic class with a `__weakref__` slot:
     >>> instance = SubClass()
     >>> instance_ref = ref(instance)
 
-In order to maintain the same interface, `GenericMeta` points to `type` when imported from `tippo` in newer versions of
-Python.
+In order to maintain the same interface, `GenericMeta` points to `type` when imported
+from `tippo` in newer versions of Python.
 
 Backports
 ---------
-Features from the latest versions of Python, such as `TypeAlias`, `ClassVar`, `NewType`, `get_origin`, and `get_args`.
+Features from the latest versions of Python, such as `TypeAlias`, `ClassVar`, `NewType`,
+`get_origin`, and `get_args`.
 
 .. code:: python
 
@@ -117,20 +123,6 @@ Features from the latest versions of Python, such as `TypeAlias`, `ClassVar`, `N
     >>> mapping_type = Mapping[str, int]
     >>> [get_name(a) for a in get_args(mapping_type)]
     ['str', 'int']
-
-Generic Weak Structures
------------------------
-Generic versions of weak data structures that work with older Python versions' type annotations.
-
-.. code:: python
-
-    >>> from tippo import Any, ReferenceType, WeakSet, WeakKeyDictionary, WeakValueDictionary, TypeAlias
-    >>> class Foo(object):
-    ...     pass
-    >>> FooWeakRef = ReferenceType[Foo]  # type: TypeAlias
-    >>> FooWeakSet = WeakSet[Foo]  # type: TypeAlias
-    >>> FooWeakKeyDictionary = WeakKeyDictionary[Foo, Any]  # type: TypeAlias
-    >>> FooWeakValueDictionary = WeakValueDictionary[Any, Foo]  # type: TypeAlias
 
 Commonly Used Protocols
 -----------------------

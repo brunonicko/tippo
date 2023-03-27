@@ -1,6 +1,6 @@
 import os
 
-import setuptools  # type: ignore
+import setuptools
 
 with open("README.rst", "r") as fh:
     long_description_lines = fh.read().split("\n")
@@ -15,7 +15,9 @@ with open("README.rst", "r") as fh:
 
     assert line_nos["logo_start"] < line_nos["logo_end"]
 
-    long_description = "Tippo\n=====\n" + "\n".join(long_description_lines[line_nos["logo_end"] + 1 :])
+    long_description = "Tippo\n=====\n" + "\n".join(
+        long_description_lines[line_nos["logo_end"] + 1 :]
+    )
 
 
 with open("requirements.txt", "r") as fh:
@@ -24,7 +26,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="tippo",
-    version="3.11.0",
+    version="4.0.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
     description="Use the latest type annotation features in older versions of Python.",
@@ -46,6 +48,8 @@ setuptools.setup(
         "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
-    python_requires=">= 2.7, " "!= 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*, != 3.5.*, != 3.6.*",
+    python_requires=(
+        ">= 2.7, != 3.0.*, != 3.1.*, != 3.2.*, != 3.3.*, != 3.4.*, != 3.5.*, != 3.6.*"
+    ),
     tests_require=["pytest"],
 )

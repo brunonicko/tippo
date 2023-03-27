@@ -1,15 +1,9 @@
 import functools as _functools
-import types as _types
-
-# Import typing.
 import typing as _typing
 from typing import *  # noqa
 from weakref import ref  # noqa
-from weakref import ReferenceType, WeakKeyDictionary, WeakSet, WeakValueDictionary
 
 import six as _six
-
-# Import typing extensions.
 import typing_extensions as _typing_extensions
 from six.moves import collections_abc as _collections_abc
 from typing_extensions import *  # type: ignore
@@ -42,7 +36,10 @@ _BUILTINS_MAPPING = {
 }
 _BUILTINS_MAPPING.update(
     dict(
-        (getattr(_typing, n, getattr(_typing_extensions, n, None)), getattr(_collections_abc, n))
+        (
+            getattr(_typing, n, getattr(_typing_extensions, n, None)),
+            getattr(_collections_abc, n),
+        )
         for n in set(getattr(_collections_abc, "__all__")).intersection(
             _typing.__all__ + _typing_extensions.__all__  # type: ignore
         )
@@ -76,6 +73,9 @@ def get_typing(typ):
 _update_all("get_builtin", "get_typing")
 
 
+_T = TypeVar("_T")
+
+
 # Patch GenericMeta for Python 2.7 with some fixes.
 try:
     from typing import GenericMeta as _GenericMeta  # type: ignore
@@ -83,33 +83,40 @@ except ImportError:
     GenericMeta = type
 else:
 
-    # Fix not equal operator logic in python 2.
-    def __ne__(cls, other):
-        is_equal = cls == other
-        if is_equal is NotImplemented:
-            return NotImplemented
-        else:
-            return not is_equal
+    class _Class(Generic[_T]):
+        pass
 
-    __ne__.__module__ = _GenericMeta.__module__
-    type.__setattr__(_GenericMeta, "__ne__", __ne__)
+    # Apply fixes for Python 2 if needed.
+    if (_Class[int] != _Class[(int,)]) is not False:
+        # Fix not equal operator logic in python 2.
+        def __ne__(cls, other):
+            is_equal = cls == other
+            if is_equal is NotImplemented:
+                return NotImplemented
+            else:
+                return not is_equal
 
-    # Fix subclassing slotted generic class with __weakref__.
-    _original_getitem = getattr(_GenericMeta, "__getitem__")
+        __ne__.__module__ = _GenericMeta.__module__
+        type.__setattr__(_GenericMeta, "__ne__", __ne__)
 
-    @_functools.wraps(_original_getitem)
-    def __getitem__(cls, params):
-        slots = getattr(cls, "__slots__", None)
-        if slots is not None and "__weakref__" in slots:
-            type.__setattr__(cls, "__slots__", tuple(s for s in slots if s != "__weakref__"))
-            try:
+        # Fix subclassing slotted generic class with __weakref__.
+        _original_getitem = getattr(_GenericMeta, "__getitem__")
+
+        @_functools.wraps(_original_getitem)
+        def __getitem__(cls, params):
+            slots = getattr(cls, "__slots__", None)
+            if slots is not None and "__weakref__" in slots:
+                type.__setattr__(
+                    cls, "__slots__", tuple(s for s in slots if s != "__weakref__")
+                )
+                try:
+                    return _original_getitem(cls, params)  # type: ignore
+                finally:
+                    type.__setattr__(cls, "__slots__", slots)
+            else:
                 return _original_getitem(cls, params)  # type: ignore
-            finally:
-                type.__setattr__(cls, "__slots__", slots)
-        else:
-            return _original_getitem(cls, params)  # type: ignore
 
-    type.__setattr__(_GenericMeta, "__getitem__", __getitem__)
+        type.__setattr__(_GenericMeta, "__getitem__", __getitem__)
 
 _update_all("GenericMeta")
 
@@ -135,7 +142,7 @@ class _MissingMeta(type):
 # Add missing TypeAlias for older Python versions.
 if "TypeAlias" not in globals():
 
-    class _TypeAlias(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
+    class _TypeAlias(_six.with_metaclass(_MissingMeta, object)):
         pass
 
     _TypeAlias.__name__ = _TypeAlias.__qualname__ = "_TypeAlias"
@@ -147,7 +154,7 @@ if "TypeAlias" not in globals():
 # Add missing ClassVar for older Python versions.
 if "ClassVar" not in globals():
 
-    class _ClassVar(_six.with_metaclass(_MissingMeta, object)):  # type: ignore
+    class _ClassVar(_six.with_metaclass(_MissingMeta, object)):
         pass
 
     _ClassVar.__name__ = _ClassVar.__qualname__ = "_ClassVar"
@@ -192,7 +199,11 @@ if "get_origin" not in globals():
         if typ in (Union, Literal, Final, ClassVar):
             return None
 
-        for name, origin in {"_Literal": Literal, "_ClassVar": ClassVar, "_Final": Final}.items():
+        for name, origin in {
+            "_Literal": Literal,
+            "_ClassVar": ClassVar,
+            "_Final": Final,
+        }.items():
             if type(typ) is getattr(_typing, name, None):
                 return origin
 
@@ -224,25 +235,26 @@ if "dataclass_transform" not in globals():
         eq_default=True,  # type: bool
         order_default=False,  # type: bool
         kw_only_default=False,  # type: bool
-        field_specifiers=(),  # type: tuple[Union[Type[Any], Callable[..., Any]], ...]
+        field_specifiers=(),  # type: Tuple[Union[Type[Any], Callable[..., Any]], ...]
         **kwargs  # type: Any
     ):
         # type: (...) -> Callable[[_T], _T]
         """
-        Decorator that marks a function, class, or metaclass as providing dataclass-like behavior.
+        Decorator that marks a function, class, or metaclass as providing dataclass-like
+        behavior.
 
         The arguments to this decorator can be used to customize this behavior:
-        - `eq_default` indicates whether the `eq` parameter is assumed to be True or False if it is omitted by the
-          caller.
-        - `order_default` indicates whether the `order` parameter is assumed to be True or False if it is omitted by
-          the caller.
-        - `kw_only_default` indicates whether the `kw_only` parameter is assumed to be True or False if it is omitted
-          by the caller.
-        - `field_specifiers` specifies a static list of supported classes or functions that describe fields, similar
-          to `dataclasses.field()`.
+        - `eq_default` indicates whether the `eq` parameter is assumed to be True or
+          False if it is omitted by the caller.
+        - `order_default` indicates whether the `order` parameter is assumed to be True
+          or False if it is omitted by the caller.
+        - `kw_only_default` indicates whether the `kw_only` parameter is assumed to be
+          True or False if it is omitted by the caller.
+        - `field_specifiers` specifies a static list of supported classes or functions
+          that describe fields, similar to `dataclasses.field()`.
 
-        At runtime, this decorator records its arguments in the `__dataclass_transform__` attribute on the decorated
-        object.
+        At runtime, this decorator records its arguments in the
+        `__dataclass_transform__` attribute on the decorated object.
 
         See PEP 681 for more details.
         """
@@ -259,61 +271,12 @@ if "dataclass_transform" not in globals():
 
         return decorator
 
-    _dataclass_transform.__name__ = _dataclass_transform.__qualname__ = "dataclass_transform"
+    _dataclass_transform.__name__ = (
+        _dataclass_transform.__qualname__
+    ) = "dataclass_transform"
     globals()["dataclass_transform"] = _dataclass_transform
 
     _update_all("dataclass_transform")
-
-
-# Build missing generic types.
-_GenericInfo = _typing.NamedTuple(
-    "_GenericInfo",
-    (
-        ("names", "_typing.Tuple[str, ...]"),
-        ("args", "_typing.Tuple[_typing.TypeVar, ...]"),
-    ),
-)
-
-_T = _typing.TypeVar("_T")
-_KT = _typing.TypeVar("_KT")
-_KT_contra = _typing.TypeVar("_KT_contra", contravariant=True)
-_VT_co = _typing.TypeVar("_VT_co", covariant=True)
-_T_co = _typing.TypeVar("_T_co", covariant=True)
-
-_GENERIC_TYPES = {
-    ReferenceType: _GenericInfo(
-        names=("ReferenceType", "ref"),
-        args=(_typing.cast(_typing.TypeVar, _T),),
-    ),
-    WeakSet: _GenericInfo(
-        names=("WeakSet",),
-        args=(_typing.cast(_typing.TypeVar, _T_co),),
-    ),
-    WeakKeyDictionary: _GenericInfo(
-        names=("WeakKeyDictionary",),
-        args=(_typing.cast(_typing.TypeVar, _KT), _typing.cast(_typing.TypeVar, _VT_co)),
-    ),
-    WeakValueDictionary: _GenericInfo(
-        names=("WeakValueDictionary",),
-        args=(_typing.cast(_typing.TypeVar, _KT), _typing.cast(_typing.TypeVar, _VT_co)),
-    ),
-}
-
-for _base, (_names, _vars) in _GENERIC_TYPES.items():
-    _update_all(*_names)
-
-    if hasattr(_base, "__class_getitem__") or hasattr(type(_base), "__getitem__"):
-        continue
-
-    if hasattr(_types, "new_class"):
-        _generic = _types.new_class(_base.__name__, (_base, _typing.Generic[_vars]))  # type: ignore
-    elif hasattr(_typing, "GenericMeta"):
-        _generic = _typing.GenericMeta(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
-    else:
-        _generic = type(_base.__name__, (_base, _typing.Generic[_vars]), {})  # type: ignore
-
-    for _name in _names:
-        globals()[_name] = _generic
 
 
 # Function to get type name that supports generics.
@@ -356,7 +319,11 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 
     # Python 2.7.
     if name is None:
-        if not hasattr(typ, "__forward_arg__") and type(typ).__module__ in ("typing", "typing_extensions", "tippo"):
+        if not hasattr(typ, "__forward_arg__") and type(typ).__module__ in (
+            "typing",
+            "typing_extensions",
+            "tippo",
+        ):
             if type(typ).__name__.lstrip("_") == "Literal":
                 return "Literal"
             if type(typ).__name__.lstrip("_") == "Final":
@@ -366,7 +333,6 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 
     # Try a couple of other ways to get the name.
     if name is None:
-
         # Get origin name.
         origin = get_origin(typ)
         if origin is not None:
@@ -389,7 +355,6 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 
         # We have an origin name.
         if origin_name:
-
             # But we don't have a name. Use the origin name instead.
             if not name:
                 name = origin_name
@@ -415,6 +380,10 @@ def get_name(typ, qualname_getter=lambda t: getattr(t, "__qualname__", None)):
 
 
 _update_all("get_name")
+
+
+_KT_contra = TypeVar("_KT_contra", contravariant=True)
+_VT_co = TypeVar("_VT_co", covariant=True)
 
 
 class SupportsGetItem(Protocol[_KT_contra, _VT_co]):
@@ -454,6 +423,9 @@ class SupportsGetSetDeleteItem(SupportsGetSetItem):
 
 
 _update_all("SupportsGetSetDeleteItem")
+
+
+_KT = TypeVar("_KT")
 
 
 class SupportsKeysAndGetItem(Protocol[_KT, _VT_co]):
