@@ -15,13 +15,13 @@ _KT = TypeVar("_KT")
 
 
 # Prepare __all__ by combining typing + typing_extensions.
-_all_ = _typing.__all__ + _typing_extensions.__all__
+_all_ = sorted(str(m) for m in set(_typing.__all__ + _typing_extensions.__all__))
 globals()["__all__"] = _all_
 
 
 def _update_all(*_members):
     # type: (*str) -> None
-    _all_.extend(set(_members).difference(_all_))
+    _all_.extend(set(str(m) for m in _members).difference(_all_))
 
 
 # Forward reference type.
