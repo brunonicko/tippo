@@ -13,6 +13,9 @@ T = tippo.TypeVar("T")
 
 
 def test_all():
+    for member in getattr(tippo, "__all__"):
+        assert type(member) is str
+
     assert tippo._all_ is getattr(tippo, "__all__")
 
     assert set(typing.__all__).issubset(tippo._all_)
