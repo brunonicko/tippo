@@ -1,12 +1,14 @@
 import functools as _functools
 import typing as _typing
-from typing import *  # noqa
 from weakref import ref  # noqa
 
 import six as _six
 import typing_extensions as _typing_extensions
 from six.moves import collections_abc as _collections_abc
-from typing_extensions import *  # type: ignore
+from typing_extensions import *
+
+if True:
+    from typing import *  # type: ignore  # noqa
 
 _T = TypeVar("_T")
 _KT_contra = TypeVar("_KT_contra", contravariant=True)
