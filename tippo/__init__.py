@@ -10,6 +10,7 @@ from typing_extensions import *
 if True:
     from typing import *  # type: ignore  # noqa
 
+
 _T = TypeVar("_T")
 _KT_contra = TypeVar("_KT_contra", contravariant=True)
 _VT_co = TypeVar("_VT_co", covariant=True)
@@ -67,7 +68,7 @@ def get_builtin(typ):
     :param typ: Type.
     :return: Builtin type.
     """
-    return _BUILTINS_MAPPING.get(typ, typ)
+    return cast(_T, _BUILTINS_MAPPING.get(typ, typ))
 
 
 def get_typing(typ):
@@ -78,7 +79,7 @@ def get_typing(typ):
     :param typ: Type.
     :return: Typing type.
     """
-    return _TYPING_MAPPING.get(typ, typ)
+    return cast(_T, _TYPING_MAPPING.get(typ, typ))
 
 
 _update_all("get_builtin", "get_typing")
@@ -86,7 +87,7 @@ _update_all("get_builtin", "get_typing")
 
 # Patch GenericMeta for Python 2.7 with some fixes.
 try:
-    from typing import GenericMeta as _GenericMeta  # type: ignore
+    from typing import GenericMeta as _GenericMeta  # type: ignore  # noqa
 except ImportError:
     GenericMeta = type
 else:
@@ -201,6 +202,56 @@ if "NewType" not in globals():
     _update_all("NewType")
 
 
+# Add missing Unpack for older Python versions.
+if "Unpack" not in globals():
+
+    class _Unpack(_six.with_metaclass(_MissingMeta, object)):
+        pass
+
+    _Unpack.__name__ = _Unpack.__qualname__ = "_Unpack"
+    globals()["Unpack"] = _Unpack
+
+    _update_all("_Unpack")
+
+
+# Add missing IO for older Python versions.
+if "IO" not in globals():
+
+    class _IO(_six.with_metaclass(_MissingMeta, object)):
+        pass
+
+    _IO.__name__ = _IO.__qualname__ = "_IO"
+    globals()["IO"] = _IO
+
+    _update_all("_IO")
+
+
+# Add missing TextIO type for older Python versions.
+if "TextIO" not in globals():
+
+    def _TextIO():  # type: ignore
+        error = "can't instantiate tippo.TextIO"
+        raise TypeError(error)
+
+    _TextIO.__name__ = _TextIO.__qualname__ = "TextIO"
+    globals()["TextIO"] = _TextIO
+
+    _update_all("TextIO")
+
+
+# Add missing BinaryIO type for older Python versions.
+if "BinaryIO" not in globals():
+
+    def _BinaryIO():  # type: ignore
+        error = "can't instantiate tippo.BinaryIO"
+        raise TypeError(error)
+
+    _BinaryIO.__name__ = _BinaryIO.__qualname__ = "BinaryIO"
+    globals()["BinaryIO"] = _BinaryIO
+
+    _update_all("BinaryIO")
+
+
 # Add missing Self type for older Python versions.
 if "Self" not in globals():
 
@@ -214,7 +265,126 @@ if "Self" not in globals():
     _update_all("Self")
 
 
-# Add missing inspection functions for older Python versions.
+# Add missing NoReturn type for older Python versions.
+if "NoReturn" not in globals():
+
+    def _NoReturn():  # type: ignore
+        error = "can't instantiate tippo.NoReturn"
+        raise TypeError(error)
+
+    _NoReturn.__name__ = _NoReturn.__qualname__ = "NoReturn"
+    globals()["NoReturn"] = _NoReturn
+
+    _update_all("NoReturn")
+
+
+# Add missing override decorator for older Python versions.
+if "override" not in globals():
+
+    def _override(func):  # type: ignore
+        return func
+
+    _override.__name__ = _override.__qualname__ = "override"
+    globals()["override"] = _override
+
+    _update_all("override")
+
+
+# Add missing ParamSpec type var for older Python versions.
+if "ParamSpec" not in globals():
+    assert "ParamSpecArgs" not in globals()
+    assert "ParamSpecKwargs" not in globals()
+
+    class _ParamSpec(object):
+        def __init__(self, name, bound=None, covariant=False, contravariant=False):
+            # type: (str, Any, bool, bool) -> None
+            TypeVar(  # noqa
+                name,  # noqa
+                bound=bound,  # noqa
+                covariant=covariant,  # noqa
+                contravariant=contravariant,  # noqa
+            )  # noqa
+            self.__name__ = name
+            self.__covariant__ = bool(covariant)
+            self.__contravariant__ = bool(contravariant)
+            self.__bound__ = bound
+
+        def __or__(self, right):
+            # type: (object) -> Any
+            return Union[self, right]
+
+        def __ror__(self, left):
+            # type: (object) -> Any
+            return Union[left, self]
+
+        def __repr__(self):
+            # type: () -> str
+            if self.__covariant__:
+                prefix = "+"
+            elif self.__contravariant__:
+                prefix = "-"
+            else:
+                prefix = "~"
+            return prefix + self.__name__
+
+        def __reduce__(self):
+            # type: () -> str
+            return self.__name__
+
+        @property
+        def args(self):
+            # type: () -> _ParamSpecArgs
+            return _ParamSpecArgs(self)
+
+        @property
+        def kwargs(self):
+            # type: () -> _ParamSpecKwargs
+            return _ParamSpecKwargs(self)
+
+    _ParamSpec.__name__ = _ParamSpec.__qualname__ = "ParamSpec"
+    globals()["ParamSpec"] = _ParamSpec
+    _update_all("ParamSpec")
+
+    class _ParamSpecArgs(object):
+        def __init__(self, origin):
+            # type: (_ParamSpec) -> None
+            self.__origin__ = origin
+
+        def __repr__(self):
+            # type: () -> str
+            return "{}.args".format(self.__origin__.__name__)
+
+        def __eq__(self, other):
+            # type: (object) -> bool
+            if not isinstance(other, _ParamSpecArgs):
+                return NotImplemented
+            return self.__origin__ == other.__origin__
+
+    _ParamSpecArgs.__name__ = _ParamSpecArgs.__qualname__ = "ParamSpecArgs"
+    globals()["ParamSpecArgs"] = _ParamSpecArgs
+    _update_all("ParamSpecArgs")
+
+    class _ParamSpecKwargs(object):
+        def __init__(self, origin):
+            # type: (_ParamSpec) -> None
+            self.__origin__ = origin
+
+        def __repr__(self):
+            # type: () -> str
+            return "{}.args".format(self.__origin__.__name__)
+
+        def __eq__(self, other):
+            # type: (object) -> bool
+            if not isinstance(other, _ParamSpecKwargs):
+                return NotImplemented
+            return self.__origin__ == other.__origin__
+
+    _ParamSpecKwargs.__name__ = _ParamSpecKwargs.__qualname__ = "ParamSpecKwargs"
+    globals()["ParamSpecKwargs"] = _ParamSpecKwargs
+    _update_all("ParamSpecKwargs")
+
+
+# Add missing get_origin function for older Python versions.
 if "get_origin" not in globals():
     from typing_inspect import get_origin as _typing_inspect_get_origin  # type: ignore
 
@@ -243,6 +413,7 @@ if "get_origin" not in globals():
     _update_all("get_origin")
 
 
+# Add missing get_args function for older Python versions.
 if "get_args" not in globals():
     from typing_inspect import get_args as _typing_inspect_get_args
 
@@ -257,6 +428,7 @@ if "get_args" not in globals():
     _update_all("get_args")
 
 
+# Add missing dataclass_transform function for older Python versions.
 if "dataclass_transform" not in globals():
 
     def _dataclass_transform(
