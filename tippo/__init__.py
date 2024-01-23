@@ -187,7 +187,7 @@ if "ClassVar" not in globals():
     _ClassVar.__name__ = _ClassVar.__qualname__ = "_ClassVar"
     globals()["ClassVar"] = _ClassVar
 
-    _update_all("_ClassVar")
+    _update_all("ClassVar")
 
 
 # Add missing NewType for older Python versions.
@@ -211,7 +211,7 @@ if "Unpack" not in globals():
     _Unpack.__name__ = _Unpack.__qualname__ = "_Unpack"
     globals()["Unpack"] = _Unpack
 
-    _update_all("_Unpack")
+    _update_all("Unpack")
 
 
 # Add missing IO for older Python versions.
@@ -223,7 +223,7 @@ if "IO" not in globals():
     _IO.__name__ = _IO.__qualname__ = "_IO"
     globals()["IO"] = _IO
 
-    _update_all("_IO")
+    _update_all("IO")
 
 
 # Add missing TextIO type for older Python versions.
