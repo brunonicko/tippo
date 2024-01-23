@@ -68,7 +68,7 @@ def get_builtin(typ):
     :param typ: Type.
     :return: Builtin type.
     """
-    return _BUILTINS_MAPPING.get(typ, typ)
+    return cast(_T, _BUILTINS_MAPPING.get(typ, typ))
 
 
 def get_typing(typ):
@@ -79,7 +79,7 @@ def get_typing(typ):
     :param typ: Type.
     :return: Typing type.
     """
-    return _TYPING_MAPPING.get(typ, typ)
+    return cast(_T, _TYPING_MAPPING.get(typ, typ))
 
 
 _update_all("get_builtin", "get_typing")
@@ -297,6 +297,7 @@ if "ParamSpec" not in globals():
 
     class _ParamSpec(object):
         def __init__(self, name, bound=None, covariant=False, contravariant=False):
+            # type: (str, Any, bool, bool) -> None
             TypeVar(  # noqa
                 name,  # noqa
                 bound=bound,  # noqa
@@ -309,12 +310,15 @@ if "ParamSpec" not in globals():
             self.__bound__ = bound
 
         def __or__(self, right):
+            # type: (object) -> Any
             return Union[self, right]
 
         def __ror__(self, left):
+            # type: (object) -> Any
             return Union[left, self]
 
         def __repr__(self):
+            # type: () -> str
             if self.__covariant__:
                 prefix = "+"
             elif self.__contravariant__:
@@ -324,14 +328,17 @@ if "ParamSpec" not in globals():
             return prefix + self.__name__
 
         def __reduce__(self):
+            # type: () -> str
             return self.__name__
 
         @property
         def args(self):
+            # type: () -> _ParamSpecArgs
             return _ParamSpecArgs(self)
 
         @property
         def kwargs(self):
+            # type: () -> _ParamSpecKwargs
             return _ParamSpecKwargs(self)
 
     _ParamSpec.__name__ = _ParamSpec.__qualname__ = "ParamSpec"
@@ -340,12 +347,15 @@ if "ParamSpec" not in globals():
 
     class _ParamSpecArgs(object):
         def __init__(self, origin):
+            # type: (_ParamSpec) -> None
             self.__origin__ = origin
 
         def __repr__(self):
+            # type: () -> str
             return "{}.args".format(self.__origin__.__name__)
 
         def __eq__(self, other):
+            # type: (object) -> bool
             if not isinstance(other, _ParamSpecArgs):
                 return NotImplemented
             return self.__origin__ == other.__origin__
@@ -356,12 +366,15 @@ if "ParamSpec" not in globals():
 
     class _ParamSpecKwargs(object):
         def __init__(self, origin):
+            # type: (_ParamSpec) -> None
             self.__origin__ = origin
 
         def __repr__(self):
+            # type: () -> str
             return "{}.args".format(self.__origin__.__name__)
 
         def __eq__(self, other):
+            # type: (object) -> bool
             if not isinstance(other, _ParamSpecKwargs):
                 return NotImplemented
             return self.__origin__ == other.__origin__
