@@ -26,7 +26,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="tippo",
-    version="4.0.4",
+    version="4.1.0",
     author="Bruno Nicko",
     author_email="brunonicko@gmail.com",
     description="Use the latest type annotation features in older versions of Python.",
@@ -46,6 +46,7 @@ setuptools.setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3.10",
         "Programming Language :: Python :: 3.11",
+        "Programming Language :: Python :: 3.12",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
     python_requires=(
